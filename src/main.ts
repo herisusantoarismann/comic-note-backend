@@ -11,6 +11,15 @@ async function bootstrap() {
     .setTitle('API Documentation')
     .setDescription('API documentation for Comic Note')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        name: 'Authorization',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        type: 'http',
+      },
+      'Token',
+    )
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
