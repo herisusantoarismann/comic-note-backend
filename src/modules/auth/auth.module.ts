@@ -25,4 +25,4 @@ import { PrismaService } from 'src/prisma.service';
     },
   ],
 })
-export class UserModule {}
+export class AuthModule {}
