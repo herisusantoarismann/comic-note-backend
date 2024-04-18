@@ -63,12 +63,12 @@ export class AuthService {
   }
 
   private generateAccessToken(id: number, email: string): string {
-    const payload = { sub: id, username: email }; // Customize payload as needed
+    const payload = { id: id, email: email }; // Customize payload as needed
     return this.jwtService.sign(payload);
   }
 
   private generateRefreshToken(id: number): string {
-    const payload = { sub: id }; // Customize payload as needed
+    const payload = { id: id }; // Customize payload as needed
     return this.jwtService.sign(payload);
   }
 

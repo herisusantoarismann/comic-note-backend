@@ -6,21 +6,30 @@ import {
   Param,
   Post,
   Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ComicService } from './comic.service';
 import { Comic } from './interfaces/comic.interface';
 import { CreateComic } from './dto/create-comic.dto';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { convertDay } from 'src/common/helpers/convertDay';
 
-@ApiBearerAuth()
+@ApiBearerAuth('Token')
+@UseGuards(AuthGuard)
 @ApiTags('Comics')
 @Controller('comics')
 export class ComicController {
   constructor(private readonly comicService: ComicService) {}
 
   @Get()
-  async findAll(): Promise<{ success: Boolean; data: Comic[] }> {
-    const comics = await this.comicService.findAll();
+  async findAll(
+    @Req() request: any,
+  ): Promise<{ success: Boolean; data: Comic[] }> {
+    const user = request.user;
+
+    const comics = await this.comicService.findAll(user?.id);
 
     return {
       success: true,
@@ -34,8 +43,23 @@ export class ComicController {
   }
 
   @Post()
-  async create(@Body() createComicDto: CreateComic): Promise<Comic> {
-    return this.comicService.create(createComicDto);
+  async create(
+    @Req() request: any,
+    @Body() createComicDto: CreateComic,
+  ): Promise<{ success: Boolean; data: Comic }> {
+    const user = request.user;
+
+    console.info(user?.id);
+
+    const newComic = await this.comicService.create(user?.id, createComicDto);
+
+    return {
+      success: true,
+      data: {
+        ...newComic,
+        day: convertDay(newComic?.updateDay),
+      },
+    };
   }
 
   @Put(':id')

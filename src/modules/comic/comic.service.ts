@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Comic } from '.prisma/client';
 import { CreateComic } from './dto/create-comic.dto';
 import { PrismaService } from 'src/prisma.service';
+import { convertDay } from 'src/common/helpers/convertDay';
 
 interface IComic {
   title: string;
@@ -16,13 +17,16 @@ interface IComic {
 export class ComicService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(): Promise<IComic[]> {
+  async findAll(id: string): Promise<IComic[]> {
     return this.prisma.getPrisma().comic.findMany({
       select: {
         title: true,
         genre: true,
         chapter: true,
         updateDay: true,
+      },
+      where: {
+        idPengguna: Number(id),
       },
     });
   }
@@ -39,13 +43,30 @@ export class ComicService {
     });
   }
 
-  async create(data: CreateComic): Promise<{
+  async create(
+    id: string,
+    data: CreateComic,
+  ): Promise<{
     title: string;
     genre: string;
     chapter: number;
     updateDay: number;
   }> {
-    return this.prisma.getPrisma().comic.create({ data });
+    return this.prisma.getPrisma().comic.create({
+      data: {
+        title: data?.title,
+        chapter: data?.chapter,
+        genre: data?.genre,
+        updateDay: data?.updateDay,
+        idPengguna: Number(id),
+      },
+      select: {
+        title: true,
+        chapter: true,
+        genre: true,
+        updateDay: true,
+      },
+    });
   }
 
   async update(id: number, data: CreateComic): Promise<IComic> {
@@ -62,11 +83,9 @@ export class ComicService {
   }
 
   async remove(id: number): Promise<IComic> {
-    return this.prisma
-      .getPrisma()
-      .comic.delete({
-        select: { title: true, genre: true, chapter: true, updateDay: true },
-        where: { id },
-      });
+    return this.prisma.getPrisma().comic.delete({
+      select: { title: true, genre: true, chapter: true, updateDay: true },
+      where: { id },
+    });
   }
 }

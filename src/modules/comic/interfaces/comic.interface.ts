@@ -4,4 +4,5 @@ export interface Comic {
   genre: string;
   chapter: number;
   updateDay: number;
+  day?: string;
 }

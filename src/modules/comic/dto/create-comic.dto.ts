@@ -17,8 +17,4 @@ export class CreateComic {
   @ApiProperty()
   @IsInt()
   updateDay: number;
-
-  @ApiProperty()
-  @IsNotEmpty()
-  idPengguna: number;
 }
