@@ -16,10 +16,12 @@ datasource db {
 // Tabel Pengguna
 model User {
   id          Int      @id @default(autoincrement())
-  name String
+  name        String
   password    String
   email       String @unique
   comic       Comic[]
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
 
   // Relasi terbalik dari ResetPassword
   resetPasswords ResetPassword[]
@@ -34,6 +36,8 @@ model Comic {
   genre         String?
   chapter       Int?
   updateDay     Int?
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now()) @updatedAt
 
   // Relasi dengan Tabel Pengguna
   pengguna      User @relation(fields: [idPengguna], references: [id])
@@ -49,6 +53,7 @@ model ResetPassword {
   created_at    DateTime @default(now())
   user          User @relation(fields: [idUser], references: [id])
   idUser        Int
+  updated_at    DateTime @default(now()) @updatedAt
 
   @@map("reset_password")
 }
