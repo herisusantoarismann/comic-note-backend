@@ -7,27 +7,11 @@ import { PrismaService } from './prisma.service';
 import { APP_PIPE } from '@nestjs/core';
 import { JwtModule, JwtService } from '@nestjs/jwt';
 import { ConfigModule } from '@nestjs/config';
+import { UserModule } from './user/auth.module';
 
 @Module({
-  imports: [
-    ConfigModule.forRoot(),
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      global: true,
-      signOptions: {
-        expiresIn: '7d',
-      },
-    }),
-  ],
-  controllers: [AppController, AuthController],
-  providers: [
-    AppService,
-    AuthService,
-    PrismaService,
-    {
-      provide: APP_PIPE,
-      useClass: ValidationPipe,
-    },
-  ],
+  imports: [ConfigModule.forRoot(), UserModule],
+  controllers: [AppController],
+  providers: [AppService],
 })
 export class AppModule {}
