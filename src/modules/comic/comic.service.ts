@@ -5,6 +5,7 @@ import { Comic } from '.prisma/client';
 import { CreateComic } from './dto/create-comic.dto';
 import { PrismaService } from 'src/prisma.service';
 import { convertDay } from 'src/common/helpers/convertDay';
+import { title } from 'process';
 
 interface IComic {
   title: string;
@@ -17,8 +18,16 @@ interface IComic {
 export class ComicService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async findAll(id: string): Promise<IComic[]> {
-    return this.prisma.getPrisma().comic.findMany({
+  async findAll(
+    id: string,
+    page: number = 1,
+    pageSize: number = 10,
+    query: string,
+  ): Promise<[IComic[], number]> {
+    const skip = Number.isInteger(page) ? (page - 1) * pageSize : 0;
+    const take = Number.isInteger(pageSize) ? pageSize : 10;
+
+    const comics = await this.prisma.getPrisma().comic.findMany({
       select: {
         id: true,
         title: true,
@@ -28,8 +37,19 @@ export class ComicService {
       },
       where: {
         userId: Number(id),
+        ...(query && { title: { contains: query } }),
+      },
+      skip,
+      take,
+    });
+
+    const totalCount = await this.prisma.getPrisma().comic.count({
+      where: {
+        userId: Number(id),
       },
     });
+
+    return [comics, totalCount];
   }
 
   async findOne(userId: number, id: number): Promise<IComic> {

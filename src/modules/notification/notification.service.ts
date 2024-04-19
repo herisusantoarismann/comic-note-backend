@@ -41,10 +41,28 @@ export class NotificationService {
     }
   }
 
-  async findAll(userId: number): Promise<Notification[]> {
-    return this.prisma.getPrisma().notification.findMany({
-      where: { userId },
+  async findAll(
+    userId: number,
+    page: number = 1,
+    pageSize: number = 10,
+    query: string,
+  ): Promise<[Notification[], number]> {
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
+
+    const notifications = await this.prisma.getPrisma().notification.findMany({
+      where: { userId, ...(query && { title: { contains: query } }) },
+      skip,
+      take,
     });
+
+    const totalCount = await this.prisma.getPrisma().notification.count({
+      where: {
+        userId,
+      },
+    });
+
+    return [notifications, totalCount];
   }
 
   async createNotification(

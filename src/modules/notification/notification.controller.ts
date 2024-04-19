@@ -1,10 +1,24 @@
 // src/notification/notification.controller.ts
 
-import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Req,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { Notification } from '@prisma/client'; // Sesuaikan dengan struktur model Prisma Anda
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { query } from 'express';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -16,10 +30,48 @@ export class NotificationController {
   // Endpoint untuk mendapatkan semua notifikasi
   @ApiOperation({ summary: 'Get all notifications' })
   @Get()
-  async getAllNotifications(@Req() request: any): Promise<Notification[]> {
+  @ApiQuery({
+    name: 'query',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+  })
+  async getAllNotifications(
+    @Req() request: any,
+    @Query('query') query?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ): Promise<{
+    sucess: Boolean;
+    data: Notification[];
+    page: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
     const user = request?.user;
 
-    return this.notificationService.findAll(+user.id);
+    const [notifications, totalCount] = await this.notificationService.findAll(
+      +user.id,
+      +page ?? 1,
+      +pageSize ?? 10,
+      query,
+    );
+
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    return {
+      sucess: true,
+      data: notifications,
+      page,
+      totalPages,
+      currentPage: +page,
+    };
   }
 
   // Endpoint untuk membaca notifikasi individual berdasarkan ID

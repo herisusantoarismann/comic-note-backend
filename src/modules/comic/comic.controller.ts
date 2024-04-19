@@ -7,13 +7,19 @@ import {
   Param,
   Post,
   Put,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
 import { ComicService } from './comic.service';
 import { Comic } from './interfaces/comic.interface';
 import { CreateComic } from './dto/create-comic.dto';
-import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { convertDay } from 'src/common/helpers/convertDay';
 
@@ -26,12 +32,40 @@ export class ComicController {
 
   @ApiOperation({ summary: 'Get list comics user' })
   @Get()
+  @ApiQuery({
+    name: 'query',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+  })
+  @ApiQuery({
+    name: 'pageSize',
+    required: false,
+  })
   async findAll(
     @Req() request: any,
-  ): Promise<{ success: Boolean; data: Comic[] }> {
+    @Query('query') query?: string,
+    @Query('page') page?: number,
+    @Query('pageSize') pageSize?: number,
+  ): Promise<{
+    success: Boolean;
+    data: Comic[];
+    page: number;
+    totalPages: number;
+    currentPage: number;
+  }> {
     const user = request.user;
 
-    const comics = await this.comicService.findAll(user?.id);
+    const [comics, totalCount] = await this.comicService.findAll(
+      user?.id,
+      +page,
+      +pageSize,
+      query,
+    );
+
+    const totalPages = Math.ceil(totalCount / pageSize);
 
     return {
       success: true,
@@ -41,6 +75,9 @@ export class ComicController {
           day: convertDay(comic.updateDay),
         };
       }),
+      page,
+      totalPages,
+      currentPage: +page,
     };
   }
 
