@@ -71,15 +71,16 @@ export class ComicService {
     });
   }
 
-  async update(id: number, data: CreateComic): Promise<IComic> {
+  async update(idUser: number, id: number, data: CreateComic): Promise<IComic> {
     return this.prisma.getPrisma().comic.update({
       select: {
+        id: true,
         title: true,
         genre: true,
         chapter: true,
         updateDay: true,
       },
-      where: { id },
+      where: { id: id, idPengguna: idUser },
       data,
     });
   }

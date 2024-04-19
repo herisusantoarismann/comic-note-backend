@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -36,7 +35,12 @@ export class ComicController {
 
     return {
       success: true,
-      data: comics,
+      data: comics.map((comic: Comic) => {
+        return {
+          ...comic,
+          day: convertDay(comic.updateDay),
+        };
+      }),
     };
   }
 
@@ -56,7 +60,10 @@ export class ComicController {
 
     return {
       success: true,
-      data: comic,
+      data: {
+        ...comic,
+        day: convertDay(comic.updateDay),
+      },
     };
   }
 
@@ -82,10 +89,29 @@ export class ComicController {
   @ApiOperation({ summary: 'Update comic' })
   @Put(':id')
   async update(
+    @Req() request: any,
     @Param('id') id: string,
-    @Body() createComicDto: CreateComic,
-  ): Promise<Comic> {
-    return this.comicService.update(+id, createComicDto);
+    @Body() updateComic: CreateComic,
+  ): Promise<{ success: Boolean; data: Comic }> {
+    const user = request.user;
+
+    const updatedComic = await this.comicService.update(
+      +user.id,
+      +id,
+      updateComic,
+    );
+
+    if (!updateComic) {
+      throw new NotFoundException('Comic not Found');
+    }
+
+    return {
+      success: true,
+      data: {
+        ...updatedComic,
+        day: convertDay(updatedComic.updateDay),
+      },
+    };
   }
 
   @ApiOperation({ summary: 'Delete comic' })
