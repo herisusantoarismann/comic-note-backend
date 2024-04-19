@@ -27,7 +27,7 @@ export class NotificationService {
     // Dapatkan daftar pengguna yang menyukai komik yang diperbarui
     for (const comic of updatedComics) {
       const users = await this.prisma.getPrisma().user.findMany({
-        where: { comic: { some: { id: comic.id } } },
+        where: { comics: { some: { id: comic.id } } },
       });
 
       // Kirim notifikasi ke setiap pengguna yang menyukai komik yang diperbarui

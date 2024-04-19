@@ -27,12 +27,12 @@ export class ComicService {
         updateDay: true,
       },
       where: {
-        idPengguna: Number(id),
+        userId: Number(id),
       },
     });
   }
 
-  async findOne(idUser: number, id: number): Promise<IComic> {
+  async findOne(userId: number, id: number): Promise<IComic> {
     return this.prisma.getPrisma().comic.findUnique({
       select: {
         id: true,
@@ -41,7 +41,7 @@ export class ComicService {
         chapter: true,
         updateDay: true,
       },
-      where: { id: id, idPengguna: idUser },
+      where: { id, userId },
     });
   }
 
@@ -60,7 +60,11 @@ export class ComicService {
         chapter: data?.chapter,
         genre: data?.genre,
         updateDay: data?.updateDay,
-        idPengguna: Number(id),
+        user: {
+          connect: {
+            id: Number(id),
+          },
+        },
       },
       select: {
         title: true,
@@ -71,7 +75,7 @@ export class ComicService {
     });
   }
 
-  async update(idUser: number, id: number, data: CreateComic): Promise<IComic> {
+  async update(userId: number, id: number, data: CreateComic): Promise<IComic> {
     return this.prisma.getPrisma().comic.update({
       select: {
         id: true,
@@ -80,14 +84,14 @@ export class ComicService {
         chapter: true,
         updateDay: true,
       },
-      where: { id: id, idPengguna: idUser },
+      where: { id, userId },
       data,
     });
   }
 
-  async remove(idUser: number, id: number): Promise<IComic> {
+  async remove(userId: number, id: number): Promise<IComic> {
     return this.prisma.getPrisma().comic.delete({
-      where: { id: id, idPengguna: idUser },
+      where: { id, userId },
     });
   }
 }
