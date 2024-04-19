@@ -2,13 +2,19 @@ import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUser } from './dto/create-user.dto';
 import { LoginUser } from './dto/login-user.dto';
-import { ApiBadRequestResponse, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBadRequestResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
+  @ApiOperation({ summary: 'Register user' })
   @Post('register')
   @ApiResponse({
     status: 201,
@@ -28,6 +34,7 @@ export class AuthController {
     };
   }
 
+  @ApiOperation({ summary: 'Login user' })
   @Post('login')
   @ApiResponse({
     status: 200,

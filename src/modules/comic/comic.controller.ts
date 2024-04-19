@@ -12,7 +12,7 @@ import {
 import { ComicService } from './comic.service';
 import { Comic } from './interfaces/comic.interface';
 import { CreateComic } from './dto/create-comic.dto';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { convertDay } from 'src/common/helpers/convertDay';
 
@@ -23,6 +23,7 @@ import { convertDay } from 'src/common/helpers/convertDay';
 export class ComicController {
   constructor(private readonly comicService: ComicService) {}
 
+  @ApiOperation({ summary: 'Get list comics user' })
   @Get()
   async findAll(
     @Req() request: any,
@@ -37,11 +38,13 @@ export class ComicController {
     };
   }
 
+  @ApiOperation({ summary: 'Get detail comic user' })
   @Get(':id')
   async findOne(@Param('id') id: string): Promise<Comic> {
     return this.comicService.findOne(+id);
   }
 
+  @ApiOperation({ summary: 'Add comic' })
   @Post()
   async create(
     @Req() request: any,
@@ -62,6 +65,7 @@ export class ComicController {
     };
   }
 
+  @ApiOperation({ summary: 'Update comic' })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -70,6 +74,7 @@ export class ComicController {
     return this.comicService.update(+id, createComicDto);
   }
 
+  @ApiOperation({ summary: 'Delete comic' })
   @Delete(':id')
   async remove(@Param('id') id: string): Promise<Comic> {
     return this.comicService.remove(+id);
