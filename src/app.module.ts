@@ -10,9 +10,15 @@ import { ConfigModule } from '@nestjs/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { ComicModule } from './modules/comic/comic.module';
 import { AuthMiddleware } from './shared/middlewares/auth.middleware';
+import { NotificationModule } from './modules/notification/notification.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), AuthModule, ComicModule],
+  imports: [
+    ConfigModule.forRoot(),
+    AuthModule,
+    ComicModule,
+    NotificationModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
