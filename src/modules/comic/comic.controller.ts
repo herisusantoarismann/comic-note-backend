@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
@@ -40,8 +42,22 @@ export class ComicController {
 
   @ApiOperation({ summary: 'Get detail comic user' })
   @Get(':id')
-  async findOne(@Param('id') id: string): Promise<Comic> {
-    return this.comicService.findOne(+id);
+  async findOne(
+    @Req() request: any,
+    @Param('id') id: string,
+  ): Promise<{ success: Boolean; data: Comic }> {
+    const user = request.user;
+
+    const comic = await this.comicService.findOne(+user?.id, +id);
+
+    if (!comic) {
+      throw new NotFoundException('Comic Not Found');
+    }
+
+    return {
+      success: true,
+      data: comic,
+    };
   }
 
   @ApiOperation({ summary: 'Add comic' })
@@ -51,8 +67,6 @@ export class ComicController {
     @Body() createComicDto: CreateComic,
   ): Promise<{ success: Boolean; data: Comic }> {
     const user = request.user;
-
-    console.info(user?.id);
 
     const newComic = await this.comicService.create(user?.id, createComicDto);
 

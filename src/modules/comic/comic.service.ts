@@ -20,6 +20,7 @@ export class ComicService {
   async findAll(id: string): Promise<IComic[]> {
     return this.prisma.getPrisma().comic.findMany({
       select: {
+        id: true,
         title: true,
         genre: true,
         chapter: true,
@@ -31,15 +32,16 @@ export class ComicService {
     });
   }
 
-  async findOne(id: number): Promise<IComic> {
+  async findOne(idUser: number, id: number): Promise<IComic> {
     return this.prisma.getPrisma().comic.findUnique({
       select: {
+        id: true,
         title: true,
         genre: true,
         chapter: true,
         updateDay: true,
       },
-      where: { id },
+      where: { id: id, idPengguna: idUser },
     });
   }
 
