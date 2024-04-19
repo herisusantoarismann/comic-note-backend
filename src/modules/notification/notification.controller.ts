@@ -1,14 +1,20 @@
 // src/notification/notification.controller.ts
 
-import { Controller, Get, Patch, Param, Body, Req } from '@nestjs/common';
+import { Controller, Get, Patch, Param, Req, UseGuards } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { Notification } from '@prisma/client'; // Sesuaikan dengan struktur model Prisma Anda
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 
+@ApiBearerAuth('Token')
+@UseGuards(AuthGuard)
+@ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationController {
   constructor(private readonly notificationService: NotificationService) {}
 
   // Endpoint untuk mendapatkan semua notifikasi
+  @ApiOperation({ summary: 'Get all notifications' })
   @Get()
   async getAllNotifications(@Req() request: any): Promise<Notification[]> {
     const user = request?.user;
@@ -17,6 +23,7 @@ export class NotificationController {
   }
 
   // Endpoint untuk membaca notifikasi individual berdasarkan ID
+  @ApiOperation({ summary: 'Read spesific notification' })
   @Patch(':id/read')
   async markNotificationAsRead(
     @Req() request: any,
@@ -28,6 +35,7 @@ export class NotificationController {
   }
 
   // Endpoint untuk membaca semua notifikasi
+  @ApiOperation({ summary: 'Read all notifications' })
   @Patch('readAll')
   async markAllNotificationsAsRead(@Req() request: any): Promise<void> {
     const user = request.user;
