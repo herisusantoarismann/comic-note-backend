@@ -116,7 +116,21 @@ export class ComicController {
 
   @ApiOperation({ summary: 'Delete comic' })
   @Delete(':id')
-  async remove(@Param('id') id: string): Promise<Comic> {
-    return this.comicService.remove(+id);
+  async remove(
+    @Req() request: any,
+    @Param('id') id: string,
+  ): Promise<{ success: Boolean; message: string }> {
+    const user = request.user;
+
+    const comic = await this.comicService.remove(+user?.id, +id);
+
+    if (!comic) {
+      throw new NotFoundException('Comic not found');
+    }
+
+    return {
+      success: true,
+      message: 'Comic successfully deleted.',
+    };
   }
 }

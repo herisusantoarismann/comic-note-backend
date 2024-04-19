@@ -85,10 +85,9 @@ export class ComicService {
     });
   }
 
-  async remove(id: number): Promise<IComic> {
+  async remove(idUser: number, id: number): Promise<IComic> {
     return this.prisma.getPrisma().comic.delete({
-      select: { title: true, genre: true, chapter: true, updateDay: true },
-      where: { id },
+      where: { id: id, idPengguna: idUser },
     });
   }
 }
