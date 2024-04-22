@@ -6,7 +6,17 @@ import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class LogService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {
+    // Menangani uncaught exception
+    process.on('uncaughtException', (error: Error) => {
+      this.createExceptionLog('Uncaught exception', error.message);
+    });
+
+    // Menangani unhandled rejection
+    process.on('unhandledRejection', (reason: any) => {
+      this.createExceptionLog('Unhandled rejection', reason.toString());
+    });
+  }
 
   async createExceptionLog(
     message: string,
