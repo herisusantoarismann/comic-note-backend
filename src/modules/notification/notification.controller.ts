@@ -21,7 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
-import { INotification } from './interfaces/notification';
+import { INotification } from './interfaces/notification.interface';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)

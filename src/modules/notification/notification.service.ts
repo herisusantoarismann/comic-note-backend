@@ -4,7 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Notification } from '@prisma/client';
 import * as schedule from 'node-schedule';
 import { PrismaService } from 'src/prisma.service';
-import { INotification } from './interfaces/notification';
+import { INotification } from './interfaces/notification.interface';
 
 @Injectable()
 export class NotificationService {

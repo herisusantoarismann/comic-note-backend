@@ -4,9 +4,10 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { User } from '@prisma/client';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../../prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
+import { IUser } from './interfaces/user.interface';
 
 @Injectable()
 export class AuthService {
@@ -15,7 +16,11 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(name: string, email: string, password: string): Promise<User> {
+  async register(
+    name: string,
+    email: string,
+    password: string,
+  ): Promise<IUser> {
     const existingUser = await this.findByEmail(email);
     if (existingUser) {
       throw new BadRequestException('Email already exists');
@@ -27,6 +32,11 @@ export class AuthService {
         name,
         email,
         password: hashedPassword,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
       },
     });
   }
@@ -43,6 +53,7 @@ export class AuthService {
     email: string,
     password: string,
   ): Promise<{
+    id: number;
     name: string;
     email: string;
     access_token: string;
@@ -55,6 +66,7 @@ export class AuthService {
     const accessToken = this.generateAccessToken(user?.id, user?.email);
     const refreshToken = this.generateRefreshToken(user?.id);
     return {
+      id: user?.id,
       name: user?.name,
       email: user?.email,
       access_token: accessToken,

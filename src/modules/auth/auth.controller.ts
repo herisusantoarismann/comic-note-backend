@@ -27,10 +27,7 @@ export class AuthController {
     const user = await this.authService.register(name, email, password);
     return {
       success: true,
-      data: {
-        name: user.name,
-        email: user.email,
-      },
+      data: user,
     };
   }
 
@@ -42,11 +39,24 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @HttpCode(200)
-  async login(@Body() loginUser: LoginUser) {
+  async login(@Body() loginUser: LoginUser): Promise<{
+    success: Boolean;
+    data?: {
+      id: number;
+      name: string;
+      email: string;
+      access_token: string;
+      refresh_token: string;
+    };
+    message?: string;
+  }> {
     const { email, password } = loginUser;
     const user = await this.authService.login(email, password);
     if (user) {
-      return { ...user };
+      return {
+        success: true,
+        data: user,
+      };
     } else {
       return {
         success: false,
