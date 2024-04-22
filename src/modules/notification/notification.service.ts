@@ -4,6 +4,7 @@ import { Injectable } from '@nestjs/common';
 import { Notification } from '@prisma/client';
 import * as schedule from 'node-schedule';
 import { PrismaService } from 'src/prisma.service';
+import { INotification } from './interfaces/notification';
 
 @Injectable()
 export class NotificationService {
@@ -82,10 +83,16 @@ export class NotificationService {
   async markAsRead(
     notificationId: number,
     userId: number,
-  ): Promise<Notification> {
+  ): Promise<INotification> {
     return this.prisma.getPrisma().notification.update({
       where: { id: notificationId, userId },
       data: { read: true },
+      select: {
+        id: true,
+        title: true,
+        body: true,
+        read: true,
+      },
     });
   }
 

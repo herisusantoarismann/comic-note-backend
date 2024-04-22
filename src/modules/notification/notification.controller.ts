@@ -9,6 +9,7 @@ import {
   UseGuards,
   Query,
   UseInterceptors,
+  NotFoundException,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { Notification } from '@prisma/client'; // Sesuaikan dengan struktur model Prisma Anda
@@ -20,6 +21,7 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { INotification } from './interfaces/notification';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -83,18 +85,38 @@ export class NotificationController {
   async markNotificationAsRead(
     @Req() request: any,
     @Param('id') id: number,
-  ): Promise<Notification> {
+  ): Promise<{ success: Boolean; data: INotification }> {
     const user = request?.user;
 
-    return this.notificationService.markAsRead(+user.id, id);
+    const notification = await this.notificationService.markAsRead(
+      +user.id,
+      id,
+    );
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    return {
+      success: true,
+      data: notification,
+    };
   }
 
   // Endpoint untuk membaca semua notifikasi
   @ApiOperation({ summary: 'Read all notifications' })
   @Patch('readAll')
-  async markAllNotificationsAsRead(@Req() request: any): Promise<void> {
+  async markAllNotificationsAsRead(@Req() request: any): Promise<{
+    success: true;
+    message: string;
+  }> {
     const user = request.user;
 
-    await this.notificationService.markAllAsRead(user.id);
+    const count = await this.notificationService.markAllAsRead(user.id);
+
+    return {
+      success: true,
+      message: `${count} data affected`,
+    };
   }
 }
