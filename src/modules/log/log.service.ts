@@ -20,10 +20,21 @@ export class LogService {
     });
   }
 
-  async getAllExceptionLogs(): Promise<
-    [logs: ExceptionLog[], totalCount: number]
-  > {
-    const logs = await this.prisma.getPrisma().exceptionLog.findMany();
+  async getAllExceptionLogs(
+    page: number = 1,
+    pageSize: number = 10,
+    query: string,
+  ): Promise<[logs: ExceptionLog[], totalCount: number]> {
+    const skip = Number.isInteger(page) ? (page - 1) * pageSize : 0;
+    const take = Number.isInteger(pageSize) ? pageSize : 10;
+
+    const logs = await this.prisma.getPrisma().exceptionLog.findMany({
+      where: {
+        ...(query && { message: { contains: query } }),
+      },
+      skip,
+      take,
+    });
 
     const totalCount = await this.prisma.getPrisma().exceptionLog.count();
 

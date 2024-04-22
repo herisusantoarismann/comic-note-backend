@@ -45,7 +45,11 @@ export class LogController {
     currentPage: number;
   }> {
     const [logs, totalCount] =
-      await this.exceptionLogService.getAllExceptionLogs();
+      await this.exceptionLogService.getAllExceptionLogs(
+        +page,
+        +pageSize,
+        query,
+      );
 
     const totalPages = Math.ceil(totalCount / pageSize);
 
