@@ -3,6 +3,7 @@ import {
   Controller,
   Delete,
   Get,
+  Inject,
   NotFoundException,
   Param,
   Post,
@@ -10,6 +11,7 @@ import {
   Query,
   Req,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ComicService } from './comic.service';
 import { Comic } from './interfaces/comic.interface';
@@ -22,13 +24,23 @@ import {
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { convertDay } from 'src/common/helpers/convertDay';
+import {
+  CACHE_MANAGER,
+  CacheInterceptor,
+  Cache,
+  CacheKey,
+} from '@nestjs/cache-manager';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
 @ApiTags('Comics')
+@UseInterceptors(CacheInterceptor)
 @Controller('comics')
 export class ComicController {
-  constructor(private readonly comicService: ComicService) {}
+  constructor(
+    private readonly comicService: ComicService,
+    @Inject(CACHE_MANAGER) private cacheManager: Cache,
+  ) {}
 
   @ApiOperation({ summary: 'Get list comics user' })
   @Get()
@@ -44,6 +56,7 @@ export class ComicController {
     name: 'pageSize',
     required: false,
   })
+  @CacheKey('comics')
   async findAll(
     @Req() request: any,
     @Query('query') query?: string,
@@ -82,6 +95,7 @@ export class ComicController {
   }
 
   @ApiOperation({ summary: 'Get detail comic user' })
+  @CacheKey('comic')
   @Get(':id')
   async findOne(
     @Req() request: any,

@@ -8,6 +8,7 @@ import {
   Req,
   UseGuards,
   Query,
+  UseInterceptors,
 } from '@nestjs/common';
 import { NotificationService } from './notification.service';
 import { Notification } from '@prisma/client'; // Sesuaikan dengan struktur model Prisma Anda
@@ -18,10 +19,11 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
-import { query } from 'express';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
+@UseInterceptors(CacheInterceptor)
 @ApiTags('Notifications')
 @Controller('notifications')
 export class NotificationController {
@@ -42,6 +44,7 @@ export class NotificationController {
     name: 'pageSize',
     required: false,
   })
+  @CacheKey('notifications')
   async getAllNotifications(
     @Req() request: any,
     @Query('query') query?: string,

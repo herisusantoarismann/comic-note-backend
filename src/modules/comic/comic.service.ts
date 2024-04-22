@@ -1,11 +1,8 @@
 // comic.service.ts
 
 import { Injectable } from '@nestjs/common';
-import { Comic } from '.prisma/client';
 import { CreateComic } from './dto/create-comic.dto';
 import { PrismaService } from 'src/prisma.service';
-import { convertDay } from 'src/common/helpers/convertDay';
-import { title } from 'process';
 
 interface IComic {
   title: string;
