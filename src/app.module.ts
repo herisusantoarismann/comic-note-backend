@@ -9,6 +9,7 @@ import { NotificationModule } from './modules/notification/notification.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { LogModule } from './modules/log/log.module';
+import { UserModule } from './modules/user/user.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { LogModule } from './modules/log/log.module';
       },
     }),
     LogModule,
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],

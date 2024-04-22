@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { LoginUser } from './dto/login-user.dto';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '../../prisma.service';
-import { CreateUser } from './dto/create-user.dto';
+import { CreateUser } from './dto/register-user.dto';
 import { BadRequestException } from '@nestjs/common';
 
 describe('AuthController', () => {
