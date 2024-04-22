@@ -8,6 +8,7 @@ import { AuthMiddleware } from './shared/middlewares/auth.middleware';
 import { NotificationModule } from './modules/notification/notification.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
+import { LogModule } from './modules/log/log.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { redisStore } from 'cache-manager-redis-yet';
         return { store };
       },
     }),
+    LogModule,
   ],
   controllers: [AppController],
   providers: [AppService],
