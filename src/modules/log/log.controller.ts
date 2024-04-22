@@ -10,7 +10,12 @@ import {
 } from '@nestjs/common';
 import { ExceptionLog } from '@prisma/client';
 import { LogService } from './log.service';
-import { ApiBearerAuth, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiQuery,
+  ApiTags,
+} from '@nestjs/swagger';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 
 @ApiBearerAuth('Token')
@@ -20,6 +25,7 @@ import { AuthGuard } from 'src/shared/guards/auth.guard';
 export class LogController {
   constructor(private readonly exceptionLogService: LogService) {}
 
+  @ApiOperation({ summary: 'Get list logs' })
   @ApiQuery({
     name: 'query',
     required: false,
@@ -62,6 +68,7 @@ export class LogController {
     };
   }
 
+  @ApiOperation({ summary: 'Get logs detail' })
   @Get(':id')
   async getExceptionLogById(
     @Param('id') id: number,
