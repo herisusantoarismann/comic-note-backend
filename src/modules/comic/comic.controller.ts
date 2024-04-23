@@ -22,8 +22,8 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/shared/guards/auth.guard';
-import { convertDay } from 'src/common/helpers/convertDay';
+import { AuthGuard } from '../../shared/guards/auth.guard';
+import { convertDay } from '../../common/helpers/convertDay';
 import {
   CACHE_MANAGER,
   CacheInterceptor,

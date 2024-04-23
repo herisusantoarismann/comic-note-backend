@@ -2,7 +2,7 @@
 
 import { Injectable } from '@nestjs/common';
 import { CreateComic } from './dto/create-comic.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../../prisma.service';
 
 interface IComic {
   title: string;
