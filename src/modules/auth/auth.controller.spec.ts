@@ -11,6 +11,7 @@ describe('AuthController', () => {
   let controller: AuthController;
   let authService: AuthService;
   let jwtService: JwtService;
+  let prismaService: PrismaService;
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -21,17 +22,42 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController);
     authService = module.get<AuthService>(AuthService);
     jwtService = module.get<JwtService>(JwtService);
+    prismaService = module.get<PrismaService>(PrismaService);
   });
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
   });
 
+  afterEach(async () => {
+    // Rollback data added during tests
+    await prismaService.getPrisma().user.deleteMany({
+      where: {
+        OR: [
+          {
+            email: 'testing1@example.com',
+          },
+          {
+            email: 'testing2@example.com',
+          },
+        ],
+      },
+    });
+  });
+
   // Register Test
   describe('register', () => {
     const validUsers: CreateUser[] = [
-      { name: 'John Doe', email: 'john@example.com', password: 'password' },
-      { name: 'Jane Doe', email: 'jane@example.com', password: 'password' },
+      {
+        name: 'Testing 1',
+        email: 'testing1@example.com',
+        password: 'password',
+      },
+      {
+        name: 'Testing 2',
+        email: 'testing2@example.com',
+        password: 'password',
+      },
     ];
 
     const invalidEmails: CreateUser[] = [
@@ -91,14 +117,14 @@ describe('AuthController', () => {
   describe('login', () => {
     it('should return user data with access token and refresh token on successful login', async () => {
       const loginUserDto: LoginUser = {
-        email: 'john@example.com',
-        password: 'password',
+        email: 'johndoe@example.com',
+        password: '123456',
       };
 
       const userData = {
         id: 1,
-        name: 'John Doe',
-        email: 'john@example.com',
+        name: 'Admin',
+        email: 'johndoe@example.com',
       };
 
       jest.spyOn(authService, 'login').mockResolvedValueOnce({
@@ -123,7 +149,7 @@ describe('AuthController', () => {
 
     it('should return error message with invalid credentials', async () => {
       const loginUserDto: LoginUser = {
-        email: 'john@example.com',
+        email: 'johndoe@example.com',
         password: 'wrongpassword',
       };
 
