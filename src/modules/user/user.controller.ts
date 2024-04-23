@@ -23,7 +23,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { AuthGuard } from '../../shared/guards/auth.guard';
 import {
   CACHE_MANAGER,
   CacheInterceptor,
