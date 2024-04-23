@@ -41,7 +41,7 @@ export class AuthService {
     });
   }
 
-  async findByEmail(email: string): Promise<User | null> {
+  async findByEmail(email: string): Promise<IUser | null> {
     return this.prisma.getPrisma().user.findUnique({
       where: {
         email,
@@ -84,14 +84,11 @@ export class AuthService {
     return this.jwtService.sign(payload);
   }
 
-  async comparePassword(
-    enteredPassword: string,
-    hash: string,
-  ): Promise<boolean> {
+  comparePassword(enteredPassword: string, hash: string): Promise<boolean> {
     return bcrypt.compare(enteredPassword, hash);
   }
 
-  async validateUser(email: string, password: string) {
+  async validateUser(email: string, password: string): Promise<IUser | null> {
     const user = await this.findByEmail(email);
 
     if (user && (await this.comparePassword(password, user.password))) {
