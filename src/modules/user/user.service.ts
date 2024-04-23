@@ -72,6 +72,10 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUser): Promise<IUser> {
     const user = await this.findOne(id);
 
+    if (!user) {
+      throw new NotFoundException('User not Found');
+    }
+
     const { name, email } = updateUserDto;
     return this.prisma.getPrisma().user.update({
       where: { id },
@@ -85,6 +89,10 @@ export class UserService {
 
   async remove(id: number): Promise<IUser> {
     const user = await this.findOne(id);
+
+    if (!user) {
+      throw new NotFoundException('User not Found');
+    }
 
     return this.prisma.getPrisma().user.delete({
       where: { id },
