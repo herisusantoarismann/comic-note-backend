@@ -1,6 +1,6 @@
 // comic.service.ts
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateComic } from './dto/create-comic.dto';
 import { PrismaService } from '../../prisma.service';
 
@@ -50,7 +50,7 @@ export class ComicService {
   }
 
   async findOne(userId: number, id: number): Promise<IComic> {
-    return this.prisma.getPrisma().comic.findUnique({
+    const comic = await this.prisma.getPrisma().comic.findUnique({
       select: {
         id: true,
         title: true,
@@ -60,6 +60,12 @@ export class ComicService {
       },
       where: { id, userId },
     });
+
+    if (!comic) {
+      throw new NotFoundException('Comic not found');
+    }
+
+    return comic;
   }
 
   async create(
@@ -93,6 +99,12 @@ export class ComicService {
   }
 
   async update(userId: number, id: number, data: CreateComic): Promise<IComic> {
+    const comic = await this.findOne(userId, id);
+
+    if (!comic) {
+      throw new NotFoundException('Comic not found');
+    }
+
     return this.prisma.getPrisma().comic.update({
       select: {
         id: true,
@@ -107,6 +119,12 @@ export class ComicService {
   }
 
   async remove(userId: number, id: number): Promise<IComic> {
+    const comic = await this.findOne(userId, id);
+
+    if (!comic) {
+      throw new NotFoundException('Comic not found');
+    }
+
     return this.prisma.getPrisma().comic.delete({
       where: { id, userId },
     });
