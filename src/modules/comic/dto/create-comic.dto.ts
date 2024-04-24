@@ -16,7 +16,7 @@ export class CreateComic {
   @ApiProperty()
   @IsArray()
   @ArrayMinSize(1)
-  @IsString({ each: true })
+  @IsInt({ each: true })
   genres: number[];
 
   @ApiProperty()
