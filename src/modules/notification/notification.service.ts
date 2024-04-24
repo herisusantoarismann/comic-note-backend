@@ -3,7 +3,7 @@
 import { Injectable } from '@nestjs/common';
 import { Notification } from '@prisma/client';
 import * as schedule from 'node-schedule';
-import { PrismaService } from 'src/prisma.service';
+import { PrismaService } from '../../prisma.service';
 import { INotification } from './interfaces/notification.interface';
 
 @Injectable()
@@ -96,8 +96,8 @@ export class NotificationService {
     });
   }
 
-  async markAllAsRead(userId: number): Promise<void> {
-    await this.prisma.getPrisma().notification.updateMany({
+  async markAllAsRead(userId: number): Promise<{ count: number }> {
+    return this.prisma.getPrisma().notification.updateMany({
       data: { read: true },
       where: { userId, read: false },
     });

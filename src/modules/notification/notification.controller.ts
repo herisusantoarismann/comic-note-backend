@@ -19,7 +19,7 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthGuard } from 'src/shared/guards/auth.guard';
+import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { INotification } from './interfaces/notification.interface';
 
@@ -112,7 +112,7 @@ export class NotificationController {
   }> {
     const user = request.user;
 
-    const count = await this.notificationService.markAllAsRead(user.id);
+    const { count } = await this.notificationService.markAllAsRead(user.id);
 
     return {
       success: true,
