@@ -15,36 +15,76 @@ datasource db {
 
 // Tabel Pengguna
 model User {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   name        String
   password    String
-  email       String @unique
-  comics       Comic[]
-  created_at  DateTime @default(now())
-  updated_at  DateTime @default(now()) @updatedAt
+  email       String    @unique
+  profilePic  String?   @default("/default-profile-pic.png")
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @default(now()) @updatedAt
 
-  // Relasi terbalik dari ResetPassword
+  // Relasi dengan komik yang dimiliki oleh pengguna
+  comics      Comic[]
+
+  // Relasi dengan reset password
   resetPasswords ResetPassword[]
+
+  // Relasi dengan notifikasi
   notifications Notification[]
+
+  // Relasi balik dengan tabel File untuk profilePic
+  profilePicFile File? @relation("ProfilePicFile", fields: [profilePicId], references: [id])
+
+  // ID file profilePic
+  profilePicId  Int? @unique
 
   @@map("users")
 }
 
 // Tabel Komik
 model Comic {
-  id            Int      @id @default(autoincrement())
-  title         String
-  genre         String?
-  chapter       Int?
-  updateDay     Int?
-  created_at    DateTime @default(now())
-  updated_at    DateTime @default(now()) @updatedAt
+  id          Int      @id @default(autoincrement())
+  title       String
+  genres      Genre[]  // Menggunakan relasi many-to-many dengan tabel Genre
+  chapter     Int?
+  updateDay   Int?
+  cover       String?  @default("/default-comic-cover.png")
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now()) @updatedAt
 
-  // Relasi dengan Tabel Pengguna
-  user          User @relation(fields: [userId], references: [id])
-  userId        Int
+  // Relasi dengan pengguna yang memiliki komik
+  user        User @relation(fields: [userId], references: [id])
+  userId      Int
+
+  // Relasi balik dengan tabel File untuk cover
+  coverFile   File? @relation("CoverFile", fields: [coverId], references: [id])
+
+  // ID file cover
+  coverId     Int? @unique
 
   @@map("comic")
+}
+
+// Tabel Genre
+model Genre {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  comics      Comic[]   // Menggunakan relasi many-to-many dengan tabel Comic
+}
+
+// Tabel File
+model File {
+  id          Int       @id @default(autoincrement())
+  name        String
+  type        String
+  size        Int
+  url         String
+  created_at  DateTime  @default(now())
+
+  // Relasi balik dengan tabel User untuk profilePic
+  user        User?     @relation("ProfilePicFile")
+
+  comic       Comic?    @relation("CoverFile")
 }
 
 // Tabel Reset_Password
@@ -54,7 +94,7 @@ model ResetPassword {
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
 
-  // Relasi dengan Tabel Pengguna
+  // Relasi dengan pengguna
   user          User @relation(fields: [idUser], references: [id])
   idUser        Int
 
