@@ -1,6 +1,6 @@
 // src/notification/notification.service.ts
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Notification } from '@prisma/client';
 import * as schedule from 'node-schedule';
 import { PrismaService } from '../../prisma.service';
@@ -71,20 +71,22 @@ export class NotificationService {
     title: string,
     body: string,
   ): Promise<Notification> {
-    return this.prisma.getPrisma().notification.create({
+    const notification = await this.prisma.getPrisma().notification.create({
       data: {
         title,
         body,
         user: { connect: { id: userId } }, // Menghubungkan notifikasi dengan pengguna yang bersangkutan
       },
     });
+
+    return notification;
   }
 
   async markAsRead(
     notificationId: number,
     userId: number,
   ): Promise<INotification> {
-    return this.prisma.getPrisma().notification.update({
+    const notification = await this.prisma.getPrisma().notification.update({
       where: { id: notificationId, userId },
       data: { read: true },
       select: {
@@ -94,6 +96,12 @@ export class NotificationService {
         read: true,
       },
     });
+
+    if (!notification) {
+      throw new NotFoundException('Notification not found');
+    }
+
+    return notification;
   }
 
   async markAllAsRead(userId: number): Promise<{ count: number }> {
