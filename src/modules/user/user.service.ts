@@ -54,12 +54,13 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUser): Promise<IUser> {
-    const { name, email, password } = createUserDto;
+    const { name, email, password, profilePicId } = createUserDto;
     return this.prisma.getPrisma().user.create({
       data: {
         name,
         email,
         password,
+        profilePicFile: { connect: { id: profilePicId } },
       },
       select: {
         id: true,
@@ -76,12 +77,13 @@ export class UserService {
       throw new NotFoundException('User not Found');
     }
 
-    const { name, email } = updateUserDto;
+    const { name, email, profilePicId } = updateUserDto;
     return this.prisma.getPrisma().user.update({
       where: { id },
       data: {
         name,
         email,
+        profilePicFile: { connect: { id: profilePicId } },
       },
       select: { id: true, name: true, email: true },
     });

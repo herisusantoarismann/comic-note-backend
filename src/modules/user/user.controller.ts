@@ -15,7 +15,6 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { UserService } from './user.service';
-import { CreateUser } from '../auth/dto/register-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
 import {
   ApiBearerAuth,
@@ -31,6 +30,7 @@ import {
 } from '@nestjs/cache-manager';
 import { IUser } from '../auth/interfaces/user.interface';
 import { Cache } from 'cache-manager';
+import { CreateUser } from './dto/create-user.dto';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
