@@ -1,11 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-  IsArray,
   IsInt,
   IsNotEmpty,
-  IsString,
   ArrayMinSize,
   IsOptional,
+  IsNumber,
 } from 'class-validator';
 
 export class CreateComic {
@@ -14,9 +13,7 @@ export class CreateComic {
   title: string;
 
   @ApiProperty()
-  @IsArray()
-  @ArrayMinSize(1)
-  @IsInt({ each: true })
+  @IsNumber({}, { each: true })
   genres: number[];
 
   @ApiProperty()
@@ -29,6 +26,6 @@ export class CreateComic {
 
   @ApiProperty({ required: false }) // Make it optional
   @IsOptional()
-  @IsString()
-  cover?: string;
+  @IsInt()
+  cover?: number;
 }

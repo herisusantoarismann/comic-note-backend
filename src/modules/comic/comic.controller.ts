@@ -125,14 +125,8 @@ export class ComicController {
     @Body() createComicDto: CreateComic,
   ): Promise<{ success: Boolean; data: IComic }> {
     const user = request.user;
-    const cover = createComicDto.cover
-      ? createComicDto.cover
-      : '/default-comic-cover.png';
 
-    const newComic = await this.comicService.create(user?.id, {
-      ...createComicDto,
-      cover,
-    });
+    const newComic = await this.comicService.create(user?.id, createComicDto);
 
     return {
       success: true,
@@ -151,14 +145,12 @@ export class ComicController {
     @Body() updateComic: CreateComic,
   ): Promise<{ success: Boolean; data: IComic }> {
     const user = request.user;
-    const cover = updateComic.cover
-      ? updateComic.cover
-      : '/default-comic-cover.png';
 
-    const updatedComic = await this.comicService.update(+user.id, +id, {
-      ...updateComic,
-      cover,
-    });
+    const updatedComic = await this.comicService.update(
+      +user.id,
+      +id,
+      updateComic,
+    );
 
     if (!updateComic) {
       throw new NotFoundException('Comic not Found');

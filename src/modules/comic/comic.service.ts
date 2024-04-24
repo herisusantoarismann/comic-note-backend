@@ -67,7 +67,7 @@ export class ComicService {
         chapter: data.chapter,
         genres: { connect: data.genres.map((genreId) => ({ id: genreId })) },
         updateDay: data.updateDay,
-        cover: data.cover, // New field for cover image
+        cover: { connect: { id: data.cover } }, // New field for cover image
         user: { connect: { id: userId } },
       },
       select: {
@@ -102,7 +102,7 @@ export class ComicService {
         chapter: data.chapter,
         genres: { connect: data.genres.map((genreId) => ({ id: genreId })) },
         updateDay: data.updateDay,
-        cover: data.cover, // Update cover image
+        cover: { connect: { id: data.cover } }, // Update cover image
         user: { connect: { id: userId } },
       },
     });
