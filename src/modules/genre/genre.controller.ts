@@ -88,7 +88,7 @@ export class GenreController {
   @ApiOperation({ summary: 'Create new genre' })
   @Post()
   async create(
-    @Body('name') createGenreDto: CreateGenre,
+    @Body() createGenreDto: CreateGenre,
   ): Promise<{ success: true; data: IGenre }> {
     const genre = await this.genreService.create(createGenreDto);
 
