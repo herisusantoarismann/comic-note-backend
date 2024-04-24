@@ -10,6 +10,7 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { redisStore } from 'cache-manager-redis-yet';
 import { LogModule } from './modules/log/log.module';
 import { UserModule } from './modules/user/user.module';
+import { GenreModule } from './modules/genre/genre.module';
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { UserModule } from './modules/user/user.module';
     }),
     LogModule,
     UserModule,
+    GenreModule,
   ],
   controllers: [AppController],
   providers: [AppService],
