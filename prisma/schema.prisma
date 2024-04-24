@@ -45,7 +45,6 @@ model Comic {
   genres      Genre[]  // Menggunakan relasi many-to-many dengan tabel Genre
   chapter     Int?
   updateDay   Int?
-  cover       String?  @default("/default-comic-cover.png")
   created_at  DateTime @default(now())
   updated_at  DateTime @default(now()) @updatedAt
 
@@ -53,8 +52,8 @@ model Comic {
   user        User @relation(fields: [userId], references: [id])
   userId      Int
 
-  // Relasi balik dengan tabel CoverFile
-  coverFile   CoverFile?
+  // Relasi Cover
+  cover       CoverFile?
 
   @@map("comic")
 }
