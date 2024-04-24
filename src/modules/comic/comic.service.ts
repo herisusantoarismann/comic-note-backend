@@ -1,39 +1,31 @@
-// comic.service.ts
-
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateComic } from './dto/create-comic.dto';
 import { PrismaService } from '../../prisma.service';
-
-interface IComic {
-  title: string;
-  genre: string;
-  chapter: number;
-  updateDay: number;
-}
+import { CreateComic } from './dto/create-comic.dto';
+import { IComic } from './interfaces/comic.interface';
 
 @Injectable()
 export class ComicService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findAll(
-    id: string,
+    userId: number,
     page: number = 1,
     pageSize: number = 10,
     query: string,
   ): Promise<[IComic[], number]> {
-    const skip = Number.isInteger(page) ? (page - 1) * pageSize : 0;
-    const take = Number.isInteger(pageSize) ? pageSize : 10;
+    const skip = Number(page) ? (page - 1) * pageSize : 1;
+    const take = Number(pageSize) ? pageSize : 1;
 
     const comics = await this.prisma.getPrisma().comic.findMany({
       select: {
         id: true,
         title: true,
-        genre: true,
+        genres: true,
         chapter: true,
         updateDay: true,
       },
       where: {
-        userId: Number(id),
+        userId,
         ...(query && { title: { contains: query } }),
       },
       skip,
@@ -42,19 +34,19 @@ export class ComicService {
 
     const totalCount = await this.prisma.getPrisma().comic.count({
       where: {
-        userId: Number(id),
+        userId,
       },
     });
 
     return [comics, totalCount];
   }
 
-  async findOne(userId: number, id: number): Promise<IComic> {
+  async findOne(userId: number, id: number): Promise<any> {
     const comic = await this.prisma.getPrisma().comic.findUnique({
       select: {
         id: true,
         title: true,
-        genre: true,
+        genres: true,
         chapter: true,
         updateDay: true,
       },
@@ -68,37 +60,27 @@ export class ComicService {
     return comic;
   }
 
-  async create(
-    id: string,
-    data: CreateComic,
-  ): Promise<{
-    title: string;
-    genre: string;
-    chapter: number;
-    updateDay: number;
-  }> {
+  async create(userId: number, data: CreateComic): Promise<any> {
     return this.prisma.getPrisma().comic.create({
       data: {
-        title: data?.title,
-        chapter: data?.chapter,
-        genre: data?.genre,
-        updateDay: data?.updateDay,
-        user: {
-          connect: {
-            id: Number(id),
-          },
-        },
+        title: data.title,
+        chapter: data.chapter,
+        genres: { connect: data.genres.map((genreId) => ({ id: genreId })) },
+        updateDay: data.updateDay,
+        cover: data.cover, // New field for cover image
+        user: { connect: { id: userId } },
       },
       select: {
         title: true,
         chapter: true,
-        genre: true,
+        genres: { select: { name: true } },
         updateDay: true,
+        cover: true, // Include cover image in the response
       },
     });
   }
 
-  async update(userId: number, id: number, data: CreateComic): Promise<IComic> {
+  async update(userId: number, id: number, data: CreateComic): Promise<any> {
     const comic = await this.findOne(userId, id);
 
     if (!comic) {
@@ -109,16 +91,24 @@ export class ComicService {
       select: {
         id: true,
         title: true,
-        genre: true,
+        genres: { select: { name: true } },
         chapter: true,
         updateDay: true,
+        cover: true, // Include cover image in the response
       },
       where: { id, userId },
-      data,
+      data: {
+        title: data.title,
+        chapter: data.chapter,
+        genres: { connect: data.genres.map((genreId) => ({ id: genreId })) },
+        updateDay: data.updateDay,
+        cover: data.cover, // Update cover image
+        user: { connect: { id: userId } },
+      },
     });
   }
 
-  async remove(userId: number, id: number): Promise<IComic> {
+  async remove(userId: number, id: number): Promise<any> {
     const comic = await this.findOne(userId, id);
 
     if (!comic) {

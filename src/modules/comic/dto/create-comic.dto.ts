@@ -1,5 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsInt,
+  IsNotEmpty,
+  IsString,
+  ArrayMinSize,
+  IsOptional,
+} from 'class-validator';
 
 export class CreateComic {
   @ApiProperty()
@@ -7,8 +14,10 @@ export class CreateComic {
   title: string;
 
   @ApiProperty()
-  @IsString()
-  genre: string;
+  @IsArray()
+  @ArrayMinSize(1)
+  @IsString({ each: true })
+  genres: number[];
 
   @ApiProperty()
   @IsInt()
@@ -17,4 +26,9 @@ export class CreateComic {
   @ApiProperty()
   @IsInt()
   updateDay: number;
+
+  @ApiProperty({ required: false }) // Make it optional
+  @IsOptional()
+  @IsString()
+  cover?: string;
 }

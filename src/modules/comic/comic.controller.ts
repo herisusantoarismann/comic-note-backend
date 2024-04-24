@@ -14,7 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { ComicService } from './comic.service';
-import { Comic } from './interfaces/comic.interface';
+import { IComic } from './interfaces/comic.interface';
 import { CreateComic } from './dto/create-comic.dto';
 import {
   ApiBearerAuth,
@@ -64,7 +64,7 @@ export class ComicController {
     @Query('pageSize') pageSize?: number,
   ): Promise<{
     success: Boolean;
-    data: Comic[];
+    data: IComic[];
     page: number;
     totalPages: number;
     currentPage: number;
@@ -78,19 +78,19 @@ export class ComicController {
       query,
     );
 
-    const totalPages = Math.ceil(totalCount / pageSize);
+    const totalPages = Math.ceil(totalCount / pageSize) ?? 1;
 
     return {
       success: true,
-      data: comics.map((comic: Comic) => {
+      data: comics.map((comic: IComic) => {
         return {
           ...comic,
           day: convertDay(comic.updateDay),
         };
       }),
-      page,
-      totalPages,
-      currentPage: +page,
+      page: page ?? 1,
+      totalPages: Number(totalPages) ? totalPages : 1,
+      currentPage: Number(page) ? +page : 1,
     };
   }
 
@@ -100,7 +100,7 @@ export class ComicController {
   async findOne(
     @Req() request: any,
     @Param('id') id: string,
-  ): Promise<{ success: Boolean; data: Comic }> {
+  ): Promise<{ success: Boolean; data: IComic }> {
     const user = request.user;
 
     const comic = await this.comicService.findOne(+user?.id, +id);
@@ -123,10 +123,16 @@ export class ComicController {
   async create(
     @Req() request: any,
     @Body() createComicDto: CreateComic,
-  ): Promise<{ success: Boolean; data: Comic }> {
+  ): Promise<{ success: Boolean; data: IComic }> {
     const user = request.user;
+    const cover = createComicDto.cover
+      ? createComicDto.cover
+      : '/default-comic-cover.png';
 
-    const newComic = await this.comicService.create(user?.id, createComicDto);
+    const newComic = await this.comicService.create(user?.id, {
+      ...createComicDto,
+      cover,
+    });
 
     return {
       success: true,
@@ -143,14 +149,16 @@ export class ComicController {
     @Req() request: any,
     @Param('id') id: string,
     @Body() updateComic: CreateComic,
-  ): Promise<{ success: Boolean; data: Comic }> {
+  ): Promise<{ success: Boolean; data: IComic }> {
     const user = request.user;
+    const cover = updateComic.cover
+      ? updateComic.cover
+      : '/default-comic-cover.png';
 
-    const updatedComic = await this.comicService.update(
-      +user.id,
-      +id,
-      updateComic,
-    );
+    const updatedComic = await this.comicService.update(+user.id, +id, {
+      ...updateComic,
+      cover,
+    });
 
     if (!updateComic) {
       throw new NotFoundException('Comic not Found');
