@@ -1,4 +1,10 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  NotFoundException,
+  Post,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUser } from './dto/register-user.dto';
 import { LoginUser } from './dto/login-user.dto';
@@ -9,6 +15,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { MailService } from '../mail/mail.service';
+import { VerifyEmail } from './dto/verify-email.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -67,5 +74,26 @@ export class AuthController {
         message: 'Invalid email or password',
       };
     }
+  }
+
+  @ApiOperation({ summary: 'Verify User by email' })
+  @Post('verify/email')
+  async verifyUserByEmail(
+    @Body() verifyEmail: VerifyEmail,
+  ): Promise<{ success: Boolean; data: { verify: Boolean } }> {
+    const { email } = verifyEmail;
+
+    const user = await this.authService.findByEmail(email);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      success: true,
+      data: {
+        verify: true,
+      },
+    };
   }
 }
