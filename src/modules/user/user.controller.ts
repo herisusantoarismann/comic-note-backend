@@ -39,7 +39,6 @@ import { CreateUser } from './dto/create-user.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
-import { ProfilePicFile } from '@prisma/client';
 import { IProfilePic } from './interfaces/profile-pic.interfaces';
 
 @ApiBearerAuth('Token')
@@ -186,7 +185,6 @@ export class UserController {
         }
         cb(null, true);
       },
-      dest: './uploads/profilePic',
     }),
   )
   async uploadFile(

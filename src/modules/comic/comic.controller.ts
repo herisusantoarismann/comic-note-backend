@@ -3,13 +3,16 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   NotFoundException,
   Param,
+  ParseFilePipeBuilder,
   Post,
   Put,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,6 +21,8 @@ import { IComic } from './interfaces/comic.interface';
 import { CreateComic } from './dto/create-comic.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -30,6 +35,10 @@ import {
   Cache,
   CacheKey,
 } from '@nestjs/cache-manager';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { ICoverComic } from './interfaces/cover.interface';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -182,6 +191,69 @@ export class ComicController {
     return {
       success: true,
       message: 'Comic successfully deleted.',
+    };
+  }
+
+  @ApiOperation({ summary: 'Upload cover comic' })
+  @Post('cover')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['cover'],
+      properties: {
+        cover: {
+          type: 'string',
+          format: 'binary',
+          nullable: false,
+        },
+      },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('cover', {
+      storage: diskStorage({
+        destination: './uploads/cover-comic',
+        filename: (req, file, cb) => {
+          const ext = file.originalname.split('.').pop();
+          const fileName = `${uuidv4()}.${ext}`;
+          cb(null, fileName);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          return cb(
+            new Error('Only JPG, JPEG, and PNG files are allowed'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async uploadFile(
+    @Req() request: any,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(png|jpeg|jpg)',
+        })
+        .addMaxSizeValidator({
+          maxSize: 5 * 1024 * 1024,
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    cover: Express.Multer.File,
+  ): Promise<{ success: Boolean; data: ICoverComic }> {
+    const user = request.user;
+
+    const savedFile = await this.comicService.uploadFile(+user?.id, cover);
+
+    return {
+      success: true,
+      data: savedFile,
     };
   }
 }

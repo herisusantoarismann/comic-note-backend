@@ -2,6 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { CreateComic } from './dto/create-comic.dto';
 import { IComic } from './interfaces/comic.interface';
+import { ICoverComic } from './interfaces/cover.interface';
+import * as path from 'path';
 
 @Injectable()
 export class ComicService {
@@ -49,6 +51,13 @@ export class ComicService {
         genres: true,
         chapter: true,
         updateDay: true,
+        cover: {
+          select: {
+            id: true,
+            name: true,
+            url: true,
+          },
+        },
       },
       where: { id, userId },
     });
@@ -67,15 +76,22 @@ export class ComicService {
         chapter: data.chapter,
         genres: { connect: data.genres.map((genreId) => ({ id: genreId })) },
         updateDay: data.updateDay,
-        cover: { connect: { id: data.cover } }, // New field for cover image
+        cover: data.cover ? { connect: { id: data.cover } } : undefined, // New field for cover image
         user: { connect: { id: userId } },
       },
       select: {
+        id: true,
         title: true,
         chapter: true,
         genres: { select: { name: true } },
         updateDay: true,
-        cover: true, // Include cover image in the response
+        cover: {
+          select: {
+            id: true,
+            name: true,
+            url: true,
+          },
+        }, // Include cover image in the response
       },
     });
   }
@@ -94,7 +110,13 @@ export class ComicService {
         genres: { select: { name: true } },
         chapter: true,
         updateDay: true,
-        cover: true, // Include cover image in the response
+        cover: {
+          select: {
+            id: true,
+            name: true,
+            url: true,
+          },
+        }, // Include cover image in the response
       },
       where: { id, userId },
       data: {
@@ -118,5 +140,39 @@ export class ComicService {
     return this.prisma.getPrisma().comic.delete({
       where: { id, userId },
     });
+  }
+
+  async uploadFile(
+    comicId: number,
+    file: Express.Multer.File,
+  ): Promise<ICoverComic> {
+    if (!file) {
+      throw new NotFoundException('No file uploaded');
+    }
+    const extWithDot = path.extname(file.originalname);
+    const ext = extWithDot.substring(1);
+
+    const savedFile = await this.prisma.getPrisma().coverFile.create({
+      data: {
+        name: file.filename,
+        type: ext,
+        size: file.size,
+        url: '/uploads/cover-comic/' + file.filename,
+        comic: { connect: { id: comicId } },
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        size: true,
+        url: true,
+      },
+    });
+
+    if (!savedFile) {
+      throw new NotFoundException('File failed to upload');
+    }
+
+    return savedFile;
   }
 }
