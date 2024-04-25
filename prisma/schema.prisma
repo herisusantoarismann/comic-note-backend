@@ -156,3 +156,15 @@ model FavoriteComic {
 
   @@map("favorite_comic")
 }
+
+
+// Email schema
+model Email {
+  id          Int       @id @default(autoincrement())
+  to          String    // Alamat email penerima
+  subject     String    // Subjek email
+  body        String    // Isi email
+  createdAt   DateTime  @default(now()) // Waktu pembuatan email
+
+  @@map("mail")
+}
