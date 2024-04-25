@@ -14,10 +14,15 @@ import { GenreModule } from './modules/genre/genre.module';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { FavoriteModule } from './modules/favorite/favorite.module';
+import { MailController } from './modules/mail/mail.controller';
+import { MailService } from './modules/mail/mail.service';
+import { MailModule } from './modules/mail/mail.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }),
     AuthModule,
     ComicModule,
     NotificationModule,
@@ -45,9 +50,10 @@ import { FavoriteModule } from './modules/favorite/favorite.module';
       serveRoot: '/uploads/',
     }),
     FavoriteModule,
+    MailModule,
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers: [AppController, MailController],
+  providers: [AppService, MailService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

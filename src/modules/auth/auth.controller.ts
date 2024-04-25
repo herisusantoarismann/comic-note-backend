@@ -8,11 +8,15 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { MailService } from '../mail/mail.service';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly mailService: MailService,
+  ) {}
 
   @ApiOperation({ summary: 'Register user' })
   @Post('register')
