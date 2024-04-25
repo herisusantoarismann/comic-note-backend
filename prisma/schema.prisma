@@ -34,6 +34,9 @@ model User {
   // Relasi balik dengan tabel ProfilePicFile
   profilePic      ProfilePicFile?
 
+  // Relasi favorite comic
+  favoriteComics  FavoriteComic[]
+
   @@map("users")
 }
 
@@ -53,6 +56,9 @@ model Comic {
 
   // Relasi Cover
   cover       CoverFile?
+
+  // Relasi balik untuk FavoriteComic
+  favorite    FavoriteComic[]
 
   @@map("comic")
 }
@@ -137,4 +143,16 @@ model ExceptionLog {
   timestamp   DateTime @default(now())
 
   @@map("exception_log")
+}
+
+// Tabel FavoriteComic
+model FavoriteComic {
+  id         Int      @id @default(autoincrement())
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id])
+  userId     Int
+  comic      Comic    @relation(fields: [comicId], references: [id])
+  comicId    Int
+
+  @@map("favorite_comic")
 }

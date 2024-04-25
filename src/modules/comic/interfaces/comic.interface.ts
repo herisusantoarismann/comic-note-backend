@@ -1,3 +1,5 @@
+import { ICoverComic } from './cover.interface';
+
 export interface IComic {
   id?: number;
   title: string;
@@ -8,5 +10,5 @@ export interface IComic {
   chapter: number;
   updateDay: number;
   day?: string;
-  cover?: string;
+  cover?: ICoverComic;
 }

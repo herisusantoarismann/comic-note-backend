@@ -48,8 +48,8 @@ export class NotificationService {
     pageSize: number = 10,
     query: string,
   ): Promise<[Notification[], number]> {
-    const skip = (page - 1) * pageSize;
-    const take = pageSize;
+    const skip = Number(pageSize) ? (page - 1) * pageSize : 0;
+    const take = Number(pageSize) ? pageSize : 10;
 
     const notifications = await this.prisma.getPrisma().notification.findMany({
       where: { userId, ...(query && { title: { contains: query } }) },
