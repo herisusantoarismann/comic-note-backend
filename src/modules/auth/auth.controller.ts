@@ -1,6 +1,6 @@
 import { Body, Controller, HttpCode, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { CreateUser } from './dto/register-user.dto';
+import { RegisterUser } from './dto/register-user.dto';
 import { LoginUser } from './dto/login-user.dto';
 import {
   ApiBadRequestResponse,
@@ -22,7 +22,7 @@ export class AuthController {
   })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @HttpCode(201)
-  async register(@Body() createUser: CreateUser) {
+  async register(@Body() createUser: RegisterUser) {
     const { name, email, password } = createUser;
     const user = await this.authService.register(name, email, password);
     return {

@@ -19,7 +19,6 @@ model User {
   name            String
   password        String
   email           String    @unique
-  profilePic      String?   @default("/default-profile-pic.png")
   created_at      DateTime  @default(now())
   updated_at      DateTime  @default(now()) @updatedAt
 
@@ -33,7 +32,7 @@ model User {
   notifications   Notification[]
 
   // Relasi balik dengan tabel ProfilePicFile
-  profilePicFile  ProfilePicFile?
+  profilePic      ProfilePicFile?
 
   @@map("users")
 }

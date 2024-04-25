@@ -3,7 +3,7 @@ import { UserController } from './user.controller';
 import { UserService } from './user.service';
 import { CreateUser } from '../auth/dto/register-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
-import { IUser } from '../auth/interfaces/user.interface';
+import { IUser } from './interfaces/user.interface';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { PrismaService } from '../../prisma.service';

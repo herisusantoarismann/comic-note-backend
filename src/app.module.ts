@@ -11,6 +11,8 @@ import { redisStore } from 'cache-manager-redis-yet';
 import { LogModule } from './modules/log/log.module';
 import { UserModule } from './modules/user/user.module';
 import { GenreModule } from './modules/genre/genre.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -37,12 +39,19 @@ import { GenreModule } from './modules/genre/genre.module';
     LogModule,
     UserModule,
     GenreModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'uploads'),
+      serveRoot: '/uploads/',
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).exclude('auth/(.*)').forRoutes('*');
+    consumer
+      .apply(AuthMiddleware)
+      .exclude('auth/(.*)', 'uploads/(.*)')
+      .forRoutes('*');
   }
 }

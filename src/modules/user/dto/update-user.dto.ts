@@ -10,14 +10,6 @@ export class UpdateUser {
   name: string;
 
   @ApiProperty({
-    nullable: false,
-    example: 'johndoe@gmail.com',
-  })
-  @IsNotEmpty()
-  @IsEmail()
-  email: string;
-
-  @ApiProperty({
     nullable: true,
     type: Number,
   })

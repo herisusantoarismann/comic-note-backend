@@ -5,12 +5,15 @@ import {
   Controller,
   Delete,
   Get,
+  HttpStatus,
   Inject,
   Param,
+  ParseFilePipeBuilder,
   Post,
   Put,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -18,6 +21,8 @@ import { UserService } from './user.service';
 import { UpdateUser } from './dto/update-user.dto';
 import {
   ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
   ApiOperation,
   ApiQuery,
   ApiTags,
@@ -28,9 +33,14 @@ import {
   CacheInterceptor,
   CacheKey,
 } from '@nestjs/cache-manager';
-import { IUser } from '../auth/interfaces/user.interface';
+import { IUser } from './interfaces/user.interface';
 import { Cache } from 'cache-manager';
 import { CreateUser } from './dto/create-user.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { ProfilePicFile } from '@prisma/client';
+import { IProfilePic } from './interfaces/profile-pic.interfaces';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -138,6 +148,70 @@ export class UserController {
     return {
       success: true,
       data: user,
+    };
+  }
+
+  @ApiOperation({ summary: 'Upload profile picture user' })
+  @Post('image')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      required: ['file'],
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+          nullable: false,
+        },
+      },
+    },
+  })
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads/profile-pic',
+        filename: (req, file, cb) => {
+          const ext = file.originalname.split('.').pop();
+          const fileName = `${uuidv4()}.${ext}`;
+          cb(null, fileName);
+        },
+      }),
+      fileFilter: (req, file, cb) => {
+        if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+          return cb(
+            new Error('Only JPG, JPEG, and PNG files are allowed'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+      dest: './uploads/profilePic',
+    }),
+  )
+  async uploadFile(
+    @Req() request: any,
+    @UploadedFile(
+      new ParseFilePipeBuilder()
+        .addFileTypeValidator({
+          fileType: '.(png|jpeg|jpg)',
+        })
+        .addMaxSizeValidator({
+          maxSize: 5 * 1024 * 1024,
+        })
+        .build({
+          errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY,
+        }),
+    )
+    file: Express.Multer.File,
+  ): Promise<{ success: Boolean; data: IProfilePic }> {
+    const user = request.user;
+
+    const savedFile = await this.userService.uploadFile(+user?.id, file);
+
+    return {
+      success: true,
+      data: savedFile,
     };
   }
 }

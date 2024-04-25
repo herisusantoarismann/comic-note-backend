@@ -4,7 +4,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
 import { CreateUser } from './dto/create-user.dto';
 import { UpdateUser } from './dto/update-user.dto';
-import { IUser } from '../auth/interfaces/user.interface';
+import { IUser } from './interfaces/user.interface';
+import { IProfilePic } from './interfaces/profile-pic.interfaces';
+import * as path from 'path';
 
 @Injectable()
 export class UserService {
@@ -45,6 +47,7 @@ export class UserService {
         id: true,
         name: true,
         email: true,
+        profilePic: { select: { id: true, name: true, url: true } },
       },
     });
     if (!user) {
@@ -60,7 +63,7 @@ export class UserService {
         name,
         email,
         password,
-        profilePicFile: { connect: { id: profilePicId } },
+        profilePic: { connect: { id: profilePicId } },
       },
       select: {
         id: true,
@@ -77,15 +80,19 @@ export class UserService {
       throw new NotFoundException('User not Found');
     }
 
-    const { name, email, profilePicId } = updateUserDto;
+    const { name, profilePicId } = updateUserDto;
     return this.prisma.getPrisma().user.update({
       where: { id },
       data: {
         name,
-        email,
-        profilePicFile: { connect: { id: profilePicId } },
+        profilePic: { connect: { id: profilePicId } },
       },
-      select: { id: true, name: true, email: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePic: { select: { id: true, name: true, url: true } },
+      },
     });
   }
 
@@ -100,5 +107,39 @@ export class UserService {
       where: { id },
       select: { id: true, name: true, email: true },
     });
+  }
+
+  async uploadFile(
+    userId: number,
+    file: Express.Multer.File,
+  ): Promise<IProfilePic> {
+    if (!file) {
+      throw new NotFoundException('No file uploaded');
+    }
+    const extWithDot = path.extname(file.originalname);
+    const ext = extWithDot.substring(1);
+
+    const savedFile = await this.prisma.getPrisma().profilePicFile.create({
+      data: {
+        name: file.filename,
+        type: ext,
+        size: file.size,
+        url: '/uploads/profile-pic/' + file.filename,
+        user: { connect: { id: userId } },
+      },
+      select: {
+        id: true,
+        name: true,
+        type: true,
+        size: true,
+        url: true,
+      },
+    });
+
+    if (!savedFile) {
+      throw new NotFoundException('File failed to upload');
+    }
+
+    return savedFile;
   }
 }
