@@ -7,19 +7,22 @@ export class MailService {
   constructor(private readonly mailerService: MailerService) {}
 
   async sendMail(options: IMail) {
-    const { to, subject, content } = options;
+    const { to, subject, content, token } = options;
 
     try {
       await this.mailerService.sendMail({
         to: to,
-        from: process.env.MAIL_SENDER, // sender address
         subject: subject, // Subject line
-        html: content,
+        template: content === 'token' ? './token' : './token', // Select template by content
+        context: {
+          token: token,
+        },
       });
       return {
         success: true,
       };
     } catch (error) {
+      console.log(error);
       return {
         success: false,
       };

@@ -20,10 +20,7 @@ import { VerifyEmail } from './dto/verify-email.dto';
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly mailService: MailService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   @ApiOperation({ summary: 'Register user' })
   @Post('register')
@@ -78,9 +75,10 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Verify User by email' })
   @Post('verify/email')
-  async verifyUserByEmail(
-    @Body() verifyEmail: VerifyEmail,
-  ): Promise<{ success: Boolean; data: { verify: Boolean } }> {
+  async verifyUserByEmail(@Body() verifyEmail: VerifyEmail): Promise<{
+    success: Boolean;
+    data: { verify: Boolean; emailSent: Boolean };
+  }> {
     const { email } = verifyEmail;
 
     const user = await this.authService.findByEmail(email);
@@ -89,10 +87,13 @@ export class AuthController {
       throw new NotFoundException('User not found');
     }
 
+    const sendToken = await this.authService.sendTokenToEmail(email);
+
     return {
       success: true,
       data: {
         verify: true,
+        emailSent: sendToken.success,
       },
     };
   }

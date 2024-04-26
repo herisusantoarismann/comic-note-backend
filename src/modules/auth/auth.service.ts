@@ -3,17 +3,19 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '@prisma/client';
 import { PrismaService } from '../../prisma.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { IUser } from '../user/interfaces/user.interface';
+import { MailService } from '../mail/mail.service';
+import { generateRandomNumbers } from 'src/common/helpers/generateRandomNumbers';
 
 @Injectable()
 export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
 
   async register(
@@ -97,5 +99,18 @@ export class AuthService {
     }
 
     return null;
+  }
+
+  async sendTokenToEmail(email: string) {
+    const token = generateRandomNumbers(6);
+
+    const options = {
+      to: email,
+      subject: 'Token Reset Password',
+      content: 'token',
+      token: token,
+    };
+
+    return this.mailService.sendMail(options);
   }
 }
