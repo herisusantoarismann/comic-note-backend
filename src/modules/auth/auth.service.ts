@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma.service';
@@ -9,6 +11,7 @@ import { JwtService } from '@nestjs/jwt';
 import { IUser } from '../user/interfaces/user.interface';
 import { MailService } from '../mail/mail.service';
 import { generateRandomNumbers } from 'src/common/helpers/generateRandomNumbers';
+import { add } from 'date-fns';
 
 @Injectable()
 export class AuthService {
@@ -101,8 +104,30 @@ export class AuthService {
     return null;
   }
 
+  async createToken(user: IUser, token: string) {
+    const expirationDuration = { minutes: 1 };
+
+    const expiredAt = add(new Date(), expirationDuration);
+
+    return this.prisma.getPrisma().resetPassword.create({
+      data: {
+        token: token,
+        expiredAt: expiredAt,
+        user: { connect: { id: user.id } },
+      },
+    });
+  }
+
   async sendTokenToEmail(email: string) {
     const token = generateRandomNumbers(6);
+
+    const user = await this.findByEmail(email);
+
+    const resetPassword = await this.createToken(user, token);
+
+    if (!resetPassword) {
+      throw new InternalServerErrorException('Token failed to created');
+    }
 
     const options = {
       to: email,
@@ -112,5 +137,28 @@ export class AuthService {
     };
 
     return this.mailService.sendMail(options);
+  }
+
+  async verifyToken(token: string) {
+    const resetPassword = await this.prisma
+      .getPrisma()
+      .resetPassword.findFirst({
+        where: {
+          AND: [{ token }],
+        },
+      });
+
+    if (!resetPassword) {
+      throw new NotFoundException('Token not found');
+    }
+
+    const now = new Date();
+    return now < resetPassword.expiredAt;
+  }
+
+  async removeToken(token: string) {
+    return this.prisma.getPrisma().resetPassword.delete({
+      where: { token },
+    });
   }
 }

@@ -16,6 +16,7 @@ import {
 } from '@nestjs/swagger';
 import { MailService } from '../mail/mail.service';
 import { VerifyEmail } from './dto/verify-email.dto';
+import { VerifyToken } from './dto/verify-token.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -94,6 +95,27 @@ export class AuthController {
       data: {
         verify: true,
         emailSent: sendToken.success,
+      },
+    };
+  }
+
+  @ApiOperation({ summary: 'Verify token' })
+  @Post('verify/token')
+  async verifyToken(
+    @Body() verifyToken: VerifyToken,
+  ): Promise<{ success: Boolean; data: { valid: Boolean } }> {
+    const { token } = verifyToken;
+
+    const valid = await this.authService.verifyToken(token);
+
+    if (!valid) {
+      this.authService.removeToken(token);
+    }
+
+    return {
+      success: true,
+      data: {
+        valid,
       },
     };
   }

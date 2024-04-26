@@ -109,7 +109,7 @@ model CoverFile {
 // Tabel Reset_Password
 model ResetPassword {
   id            Int      @id @default(autoincrement())
-  token         String   
+  token         String   @unique 
   expiredAt     DateTime
   created_at    DateTime @default(now())
   updated_at    DateTime @default(now()) @updatedAt
