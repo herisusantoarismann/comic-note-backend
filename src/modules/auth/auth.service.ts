@@ -146,6 +146,23 @@ export class AuthService {
         where: {
           AND: [{ token }],
         },
+        select: {
+          id: true,
+          expiredAt: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              profilePic: {
+                select: {
+                  id: true,
+                  url: true,
+                },
+              },
+            },
+          },
+        },
       });
 
     if (!resetPassword) {
@@ -153,12 +170,60 @@ export class AuthService {
     }
 
     const now = new Date();
-    return now < resetPassword.expiredAt;
+    const valid = now < resetPassword.expiredAt;
+    return {
+      valid,
+      user: resetPassword.user,
+    };
   }
 
   async removeToken(token: string) {
     return this.prisma.getPrisma().resetPassword.delete({
       where: { token },
+    });
+  }
+
+  async changePassword(
+    userId: number,
+    oldPassword: string,
+    newPassword: string,
+  ) {
+    const user = await this.prisma.getPrisma().user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const validPassword = await this.comparePassword(
+      oldPassword,
+      user.password,
+    );
+
+    if (!validPassword) {
+      throw new BadRequestException('Password is invalid');
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    return this.prisma.getPrisma().user.update({
+      where: { id: userId },
+      data: {
+        password: hashedPassword,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        profilePic: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+      },
     });
   }
 }

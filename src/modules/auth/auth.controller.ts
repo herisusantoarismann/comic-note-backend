@@ -17,6 +17,8 @@ import {
 import { MailService } from '../mail/mail.service';
 import { VerifyEmail } from './dto/verify-email.dto';
 import { VerifyToken } from './dto/verify-token.dto';
+import { IUser } from '../user/interfaces/user.interface';
+import { changePassword } from './dto/change-password.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -103,10 +105,10 @@ export class AuthController {
   @Post('verify/token')
   async verifyToken(
     @Body() verifyToken: VerifyToken,
-  ): Promise<{ success: Boolean; data: { valid: Boolean } }> {
+  ): Promise<{ success: Boolean; data: IUser; valid: Boolean }> {
     const { token } = verifyToken;
 
-    const valid = await this.authService.verifyToken(token);
+    const { valid, user } = await this.authService.verifyToken(token);
 
     if (!valid) {
       this.authService.removeToken(token);
@@ -114,9 +116,31 @@ export class AuthController {
 
     return {
       success: true,
-      data: {
-        valid,
-      },
+      valid,
+      data: user,
+    };
+  }
+
+  @ApiOperation({ summary: "Change user's password" })
+  @Post('change-password')
+  async changePassword(
+    @Body() changePassword: changePassword,
+  ): Promise<{ success: Boolean; data: IUser }> {
+    const { userId, oldPassword, newPassword } = changePassword;
+
+    const user = await this.authService.changePassword(
+      userId,
+      oldPassword,
+      newPassword,
+    );
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return {
+      success: true,
+      data: user,
     };
   }
 }
