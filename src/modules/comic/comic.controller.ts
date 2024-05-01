@@ -25,6 +25,7 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../shared/guards/auth.guard';
@@ -39,6 +40,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { ICoverComic } from './interfaces/cover.interface';
+import { ComicSchema } from './schemas/comic.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -65,6 +67,10 @@ export class ComicController {
     name: 'pageSize',
     required: false,
   })
+  @ApiResponse({
+    status: 200,
+    schema: ComicSchema,
+  })
   @CacheKey('comics')
   async findAll(
     @Req() request: any,
@@ -79,6 +85,8 @@ export class ComicController {
     currentPage: number;
   }> {
     const user = request.user;
+    page = Number.isInteger(+page) ? page : 1;
+    pageSize = Number.isInteger(+pageSize) ? pageSize : 10;
 
     const [comics, totalCount] = await this.comicService.findAll(
       user?.id,
@@ -93,11 +101,15 @@ export class ComicController {
       success: true,
       data: comics.map((comic: IComic) => {
         return {
-          ...comic,
+          id: comic.id,
+          title: comic.title,
+          genres: comic.genres,
+          chapter: comic.chapter,
           day: convertDay(comic.updateDay),
+          cover: comic.cover,
         };
       }),
-      page: page ?? 1,
+      page: +page ?? 1,
       totalPages: Number(totalPages) ? totalPages : 1,
       currentPage: Number(page) ? +page : 1,
     };

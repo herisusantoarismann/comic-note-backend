@@ -8,7 +8,7 @@ export interface IComic {
     name: string;
   }[];
   chapter: number;
-  updateDay: number;
+  updateDay?: number;
   day?: string;
   cover?: ICoverComic;
 }

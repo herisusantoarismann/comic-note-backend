@@ -15,8 +15,8 @@ export class ComicService {
     pageSize: number = 10,
     query: string,
   ): Promise<[IComic[], number]> {
-    const skip = Number(page) ? (page - 1) * pageSize : 0;
-    const take = Number(pageSize) ? pageSize : 10;
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
 
     const comics = await this.prisma.getPrisma().comic.findMany({
       select: {
@@ -25,10 +25,16 @@ export class ComicService {
         genres: true,
         chapter: true,
         updateDay: true,
+        cover: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
       },
       where: {
         userId,
-        ...(query && { title: { contains: query } }),
+        ...(query && { title: { contains: query, mode: 'insensitive' } }),
       },
       skip,
       take,
