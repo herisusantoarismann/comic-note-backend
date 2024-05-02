@@ -51,6 +51,18 @@ export class AuthService {
       where: {
         email,
       },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        password: true,
+        profilePic: {
+          select: {
+            id: true,
+            url: true,
+          },
+        },
+      },
     });
   }
 
@@ -90,6 +102,8 @@ export class AuthService {
   }
 
   comparePassword(enteredPassword: string, hash: string): Promise<boolean> {
+    console.log(enteredPassword);
+    console.log(hash);
     return bcrypt.compare(enteredPassword, hash);
   }
 

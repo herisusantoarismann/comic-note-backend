@@ -19,6 +19,7 @@ import { VerifyEmail } from './dto/verify-email.dto';
 import { VerifyToken } from './dto/verify-token.dto';
 import { IUser } from '../user/interfaces/user.interface';
 import { changePassword } from './dto/change-password.dto';
+import { UserSchema } from '../user/schema/user.schema';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -29,9 +30,30 @@ export class AuthController {
   @Post('register')
   @ApiResponse({
     status: 201,
-    description: 'The user has been successfully registered.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: UserSchema,
+      },
+    },
   })
-  @ApiBadRequestResponse({ description: 'Bad request' })
+  @ApiResponse({
+    status: 400,
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Email already exists' },
+        error: { type: 'string', example: 'Bad Request' },
+        statusCode: {
+          type: 'number',
+          example: 400,
+        },
+      },
+    },
+  })
   @HttpCode(201)
   async register(@Body() createUser: RegisterUser) {
     const { name, email, password } = createUser;
@@ -46,10 +68,34 @@ export class AuthController {
   @Post('login')
   @ApiResponse({
     status: 200,
-    description: 'The user has been successfully login.',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            name: { type: 'string' },
+            email: { type: 'string' },
+            access_token: { type: 'string' },
+            refresh_token: { type: 'string' },
+          },
+        },
+      },
+    },
   })
-  @ApiBadRequestResponse({ description: 'Bad request' })
-  @HttpCode(200)
+  @ApiResponse({
+    status: 401,
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Unauthorized' },
+        error: { type: 'string', example: 'Unauthorized' },
+        statusCode: { type: 'number', example: 400 },
+      },
+    },
+  })
   async login(@Body() loginUser: LoginUser): Promise<{
     success: Boolean;
     data?: {
@@ -77,6 +123,22 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Verify User by email' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: {
+          type: 'object',
+          properties: {
+            verify: { type: 'boolean' },
+            emailSent: { type: 'boolean' },
+          },
+        },
+      },
+    },
+  })
   @Post('verify/email')
   async verifyUserByEmail(@Body() verifyEmail: VerifyEmail): Promise<{
     success: Boolean;
@@ -102,6 +164,17 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Verify token' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        valid: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
   @Post('verify/token')
   async verifyToken(
     @Body() verifyToken: VerifyToken,
@@ -122,6 +195,16 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Change user's password" })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
   @Post('change-password')
   async changePassword(
     @Body() changePassword: changePassword,
