@@ -1,11 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsInt,
-  IsNotEmpty,
-  ArrayMinSize,
-  IsOptional,
-  IsNumber,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateComic {
   @ApiProperty()

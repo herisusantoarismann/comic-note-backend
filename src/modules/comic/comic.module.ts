@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { BadRequestException, Module, ValidationPipe } from '@nestjs/common';
 import { ComicService } from './comic.service';
 import { ComicController } from './comic.controller';
 import { PrismaService } from '../../prisma.service';

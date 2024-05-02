@@ -1,45 +1,39 @@
 export const ComicSchema = {
   type: 'object',
   properties: {
-    success: {
-      type: 'boolean',
+    id: {
+      type: 'number',
     },
-    data: {
+    title: {
+      type: 'string',
+    },
+    genres: {
       type: 'array',
       items: {
         type: 'object',
         properties: {
-          id: {
-            type: 'number',
-          },
-          title: {
-            type: 'string',
-          },
-          genres: {
-            type: 'array',
-            items: {
-              type: 'object',
-              properties: {
-                id: { type: 'number' },
-                name: { type: 'string' },
-              },
-            },
-          },
-          chapter: {
-            type: 'number',
-          },
-          day: {
-            type: 'string',
-          },
-          cover: {
-            type: 'object',
-            properties: {
-              id: { type: 'number' },
-              url: { type: 'string' },
-            },
-          },
+          id: { type: 'number' },
+          name: { type: 'string' },
         },
       },
     },
+    chapter: {
+      type: 'number',
+    },
+    day: {
+      type: 'string',
+    },
+    cover: {
+      type: 'object',
+      properties: {
+        id: { type: 'number' },
+        url: { type: 'string' },
+      },
+    },
   },
+};
+
+export const ComicListSchema = {
+  type: 'array',
+  items: ComicSchema,
 };

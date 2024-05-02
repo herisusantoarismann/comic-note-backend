@@ -75,7 +75,7 @@ export class ComicService {
     return comic;
   }
 
-  async create(userId: number, data: CreateComic): Promise<any> {
+  async create(userId: number, data: CreateComic): Promise<IComic> {
     return this.prisma.getPrisma().comic.create({
       data: {
         title: data.title,

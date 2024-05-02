@@ -40,7 +40,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { ICoverComic } from './interfaces/cover.interface';
-import { ComicSchema } from './schemas/comic.schema';
+import { ComicListSchema, ComicSchema } from './schemas/comic.schema';
+import { CoverSchema } from './schemas/cover.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -69,7 +70,15 @@ export class ComicController {
   })
   @ApiResponse({
     status: 200,
-    schema: ComicSchema,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: ComicListSchema,
+      },
+    },
   })
   @CacheKey('comics')
   async findAll(
@@ -116,6 +125,18 @@ export class ComicController {
   }
 
   @ApiOperation({ summary: 'Get detail comic user' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: ComicSchema,
+      },
+    },
+  })
   @CacheKey('comic')
   @Get(':id')
   async findOne(
@@ -140,6 +161,16 @@ export class ComicController {
   }
 
   @ApiOperation({ summary: 'Add comic' })
+  @ApiResponse({
+    status: 201,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: ComicSchema,
+      },
+    },
+  })
   @Post()
   async create(
     @Req() request: any,
@@ -159,6 +190,16 @@ export class ComicController {
   }
 
   @ApiOperation({ summary: 'Update comic' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'boolean' },
+        data: ComicSchema,
+      },
+    },
+  })
   @Put(':id')
   async update(
     @Req() request: any,
@@ -187,6 +228,16 @@ export class ComicController {
   }
 
   @ApiOperation({ summary: 'Delete comic' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string', example: 'Comic successfully deleted.' },
+      },
+    },
+  })
   @Delete(':id')
   async remove(
     @Req() request: any,
@@ -219,6 +270,18 @@ export class ComicController {
           format: 'binary',
           nullable: false,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 201,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: CoverSchema,
       },
     },
   })
