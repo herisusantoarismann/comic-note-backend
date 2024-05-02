@@ -22,7 +22,7 @@ export class AuthMiddleware implements NestMiddleware {
         throw new UnauthorizedException('Invalid or expired token');
       }
     } else {
-      throw new UnauthorizedException('Token not found');
+      throw new UnauthorizedException('Unauthorized');
     }
   }
 }
