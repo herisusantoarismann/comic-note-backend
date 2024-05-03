@@ -35,12 +35,12 @@ export class LogService {
     pageSize: number = 10,
     query: string,
   ): Promise<[logs: ExceptionLog[], totalCount: number]> {
-    const skip = Number.isInteger(page) ? (page - 1) * pageSize : 0;
-    const take = Number.isInteger(pageSize) ? pageSize : 10;
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
 
     const logs = await this.prisma.getPrisma().exceptionLog.findMany({
       where: {
-        ...(query && { message: { contains: query } }),
+        ...(query && { message: { contains: query, mode: 'insensitive' } }),
       },
       skip,
       take,

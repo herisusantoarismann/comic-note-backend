@@ -26,7 +26,7 @@ import { INotification } from './interfaces/notification.interface';
 import {
   NotificationListSchema,
   NotificationSchema,
-} from './schema/notification.schema';
+} from './schemas/notification.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)

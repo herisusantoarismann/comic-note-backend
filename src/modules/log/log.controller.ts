@@ -7,6 +7,7 @@ import {
   Param,
   Query,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ExceptionLog } from '@prisma/client';
 import { LogService } from './log.service';
@@ -14,12 +15,16 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../shared/guards/auth.guard';
+import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
+import { LogListSchema, LogSchema } from './schemas/log.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
+@UseInterceptors(CacheInterceptor)
 @ApiTags('Logs')
 @Controller('logs')
 export class LogController {
@@ -38,6 +43,22 @@ export class LogController {
     name: 'pageSize',
     required: false,
   })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: LogListSchema,
+        page: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 10 },
+        currentPage: { type: 'number', example: 1 },
+      },
+    },
+  })
+  @CacheKey('logs')
   @Get()
   async getAllLogs(
     @Query('query') query?: string,
@@ -50,6 +71,9 @@ export class LogController {
     totalPages: number;
     currentPage: number;
   }> {
+    page = Number.isInteger(+page) ? page : 1;
+    pageSize = Number.isInteger(+pageSize) ? pageSize : 10;
+
     const [logs, totalCount] =
       await this.exceptionLogService.getAllExceptionLogs(
         +page,
@@ -57,7 +81,7 @@ export class LogController {
         query,
       );
 
-    const totalPages = Math.ceil(totalCount / pageSize);
+    const totalPages = Math.ceil(totalCount / pageSize) ?? 1;
 
     return {
       success: true,
@@ -69,6 +93,19 @@ export class LogController {
   }
 
   @ApiOperation({ summary: 'Get logs detail' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: LogSchema,
+      },
+    },
+  })
+  @CacheKey('log')
   @Get(':id')
   async getExceptionLogById(
     @Param('id') id: number,
