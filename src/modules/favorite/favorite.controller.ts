@@ -21,8 +21,10 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { ComicListSchema, ComicSchema } from '../comic/schemas/comic.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -45,6 +47,21 @@ export class FavoriteComicController {
   @ApiQuery({
     name: 'pageSize',
     required: false,
+  })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: ComicListSchema,
+        page: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 10 },
+        currentPage: { type: 'number', example: 1 },
+      },
+    },
   })
   @CacheKey('favoriteComics')
   async findAll(
@@ -81,6 +98,16 @@ export class FavoriteComicController {
   }
 
   @ApiOperation({ summary: 'Add favorite comic' })
+  @ApiResponse({
+    status: 201,
+    schema: {
+      type: 'object',
+      properties: {
+        status: { type: 'boolean' },
+        data: ComicSchema,
+      },
+    },
+  })
   @Post()
   async create(
     @Req() request: any,
@@ -97,6 +124,19 @@ export class FavoriteComicController {
   }
 
   @ApiOperation({ summary: 'Delete favorite comic' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: {
+          type: 'string',
+          example: 'Favorite comic successfully deleted.',
+        },
+      },
+    },
+  })
   @Delete(':id')
   async remove(
     @Param('id') id: number,
