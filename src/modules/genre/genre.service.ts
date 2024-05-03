@@ -15,8 +15,8 @@ export class GenreService {
     pageSize: number = 10,
     query: string,
   ): Promise<[genres: IGenre[], totalCount: number]> {
-    const skip = Number(pageSize) ? (page - 1) * pageSize : 0;
-    const take = Number(pageSize) ? pageSize : 10;
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
 
     const where = query ? { name: { contains: query } } : {};
 

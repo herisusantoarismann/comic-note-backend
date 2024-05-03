@@ -19,6 +19,7 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { IGenre } from './interaces/genre.interface';
@@ -26,6 +27,7 @@ import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { CreateGenre } from './dto/create-genre.dto';
 import { UpdateGenre } from './dto/update-genre.dto';
+import { GenreListSchema, GenreSchema } from './schemas/genre.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -40,6 +42,21 @@ export class GenreController {
   @ApiQuery({ name: 'query', required: false })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'pageSize', required: false })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: GenreListSchema,
+        page: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 10 },
+        currentPage: { type: 'number', example: 1 },
+      },
+    },
+  })
   @CacheKey('genres')
   async findAll(
     @Query('query') query?: string,
@@ -52,6 +69,9 @@ export class GenreController {
     totalPages: number;
     currentPage: number;
   }> {
+    page = Number.isInteger(+page) ? page : 1;
+    pageSize = Number.isInteger(+pageSize) ? pageSize : 10;
+
     const [genres, totalCount] = await this.genreService.findAll(
       page,
       pageSize,
@@ -70,8 +90,20 @@ export class GenreController {
   }
 
   @ApiOperation({ summary: 'Get spesific genre' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: GenreSchema,
+      },
+    },
+  })
   @Get(':id')
-  @CacheKey('comic')
+  @CacheKey('genre')
   async findOne(
     @Param('id') id: string,
   ): Promise<{ success: Boolean; data: IGenre }> {
@@ -86,6 +118,18 @@ export class GenreController {
   }
 
   @ApiOperation({ summary: 'Create new genre' })
+  @ApiResponse({
+    status: 201,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: GenreSchema,
+      },
+    },
+  })
   @Post()
   async create(
     @Body() createGenreDto: CreateGenre,
@@ -103,6 +147,18 @@ export class GenreController {
   }
 
   @ApiOperation({ summary: 'Update genre' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: GenreSchema,
+      },
+    },
+  })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -121,6 +177,16 @@ export class GenreController {
   }
 
   @ApiOperation({ summary: 'Delete genre' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string', example: 'Genre successfully deleted.' },
+      },
+    },
+  })
   @Delete(':id')
   async remove(
     @Param('id') id: string,
@@ -138,6 +204,27 @@ export class GenreController {
   }
 
   @ApiOperation({ summary: 'Data genre for select' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: {
+              value: { type: 'number' },
+              label: { type: 'string' },
+            },
+          },
+        },
+      },
+    },
+  })
   @Get('select-data')
   async selectData(): Promise<{
     success: Boolean;
