@@ -77,6 +77,9 @@ export class ComicController {
           type: 'boolean',
         },
         data: ComicListSchema,
+        page: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 10 },
+        currentPage: { type: 'number', example: 1 },
       },
     },
   })
