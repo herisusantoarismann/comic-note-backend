@@ -13,3 +13,8 @@ export const UserSchema = {
     },
   },
 };
+
+export const UserListSchema = {
+  type: 'array',
+  items: UserSchema,
+};

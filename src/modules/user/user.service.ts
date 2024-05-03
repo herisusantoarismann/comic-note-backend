@@ -21,8 +21,8 @@ export class UserService {
     pageSize: number = 10,
     query: string,
   ): Promise<[IUser[], number]> {
-    const skip = Number.isInteger(page) ? (page - 1) * pageSize : 0;
-    const take = Number.isInteger(pageSize) ? pageSize : 10;
+    const skip = (page - 1) * pageSize;
+    const take = pageSize;
 
     const users = await this.prisma.getPrisma().user.findMany({
       where: {

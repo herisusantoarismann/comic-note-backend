@@ -25,6 +25,7 @@ import {
   ApiConsumes,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../shared/guards/auth.guard';
@@ -40,6 +41,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { IProfilePic } from './interfaces/profile-pic.interfaces';
+import { UserListSchema, UserSchema } from './schema/user.schema';
+import { ProfilePictureSchema } from './schema/profile-picture.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -66,6 +69,21 @@ export class UserController {
     name: 'pageSize',
     required: false,
   })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: UserListSchema,
+        page: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 10 },
+        currentPage: { type: 'number', example: 1 },
+      },
+    },
+  })
   @CacheKey('users')
   async findAll(
     @Req() request: any,
@@ -79,6 +97,9 @@ export class UserController {
     totalPages: number;
     currentPage: number;
   }> {
+    page = Number.isInteger(+page) ? page : 1;
+    pageSize = Number.isInteger(+pageSize) ? pageSize : 10;
+
     const [users, totalCount] = await this.userService.findAll(
       +page,
       +pageSize,
@@ -97,6 +118,16 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Get detail user' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
   @CacheKey('comic')
   @Get(':id')
   async findOne(
@@ -111,6 +142,16 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Create user' })
+  @ApiResponse({
+    status: 201,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
   @Post()
   async create(
     @Body() createUserDto: CreateUser,
@@ -124,6 +165,16 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Update user' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
   @Put(':id')
   async update(
     @Param('id') id: string,
@@ -138,6 +189,16 @@ export class UserController {
   }
 
   @ApiOperation({ summary: 'Delete user' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
   @Delete(':id')
   async remove(
     @Param('id') id: string,
@@ -163,6 +224,16 @@ export class UserController {
           format: 'binary',
           nullable: false,
         },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: ProfilePictureSchema,
       },
     },
   })
