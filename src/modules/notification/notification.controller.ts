@@ -17,11 +17,16 @@ import {
   ApiBearerAuth,
   ApiOperation,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { CacheInterceptor, CacheKey } from '@nestjs/cache-manager';
 import { INotification } from './interfaces/notification.interface';
+import {
+  NotificationListSchema,
+  NotificationSchema,
+} from './schema/notification.schema';
 
 @ApiBearerAuth('Token')
 @UseGuards(AuthGuard)
@@ -46,6 +51,21 @@ export class NotificationController {
     name: 'pageSize',
     required: false,
   })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: {
+          type: 'boolean',
+        },
+        data: NotificationListSchema,
+        page: { type: 'number', example: 1 },
+        totalPages: { type: 'number', example: 10 },
+        currentPage: { type: 'number', example: 1 },
+      },
+    },
+  })
   @CacheKey('notifications')
   async getAllNotifications(
     @Req() request: any,
@@ -60,6 +80,8 @@ export class NotificationController {
     currentPage: number;
   }> {
     const user = request?.user;
+    page = Number.isInteger(+page) ? page : 1;
+    pageSize = Number.isInteger(+pageSize) ? pageSize : 10;
 
     const [notifications, totalCount] = await this.notificationService.findAll(
       +user.id,
@@ -79,8 +101,17 @@ export class NotificationController {
     };
   }
 
-  // Endpoint untuk membaca notifikasi individual berdasarkan ID
   @ApiOperation({ summary: 'Read spesific notification' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: NotificationSchema,
+      },
+    },
+  })
   @Patch(':id/read')
   async markNotificationAsRead(
     @Req() request: any,
@@ -105,6 +136,16 @@ export class NotificationController {
 
   // Endpoint untuk membaca semua notifikasi
   @ApiOperation({ summary: 'Read all notifications' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string', example: '10 data affected' },
+      },
+    },
+  })
   @Patch('readAll')
   async markAllNotificationsAsRead(@Req() request: any): Promise<{
     success: true;
