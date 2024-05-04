@@ -128,7 +128,7 @@ export class UserController {
       },
     },
   })
-  @CacheKey('comic')
+  @CacheKey('user')
   @Get(':id')
   async findOne(
     @Param('id') id: string,

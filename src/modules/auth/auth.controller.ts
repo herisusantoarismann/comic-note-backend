@@ -1,15 +1,19 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   NotFoundException,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterUser } from './dto/register-user.dto';
 import { LoginUser } from './dto/login-user.dto';
 import {
   ApiBadRequestResponse,
+  ApiBearerAuth,
   ApiOperation,
   ApiResponse,
   ApiTags,
@@ -20,11 +24,16 @@ import { VerifyToken } from './dto/verify-token.dto';
 import { IUser } from '../user/interfaces/user.interface';
 import { changePassword } from './dto/change-password.dto';
 import { UserSchema } from '../user/schema/user.schema';
+import { UserService } from '../user/user.service';
+import { AuthGuard } from 'src/shared/guards/auth.guard';
 
 @ApiTags('Authentication')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService,
+  ) {}
 
   @ApiOperation({ summary: 'Register user' })
   @Post('register')
@@ -224,6 +233,31 @@ export class AuthController {
     return {
       success: true,
       data: user,
+    };
+  }
+
+  @ApiBearerAuth('Token')
+  @UseGuards(AuthGuard)
+  @ApiOperation({ summary: 'Get user details' })
+  @ApiResponse({
+    status: 200,
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        data: UserSchema,
+      },
+    },
+  })
+  @Get('me')
+  async findMe(@Req() request: any) {
+    const user = request.user;
+
+    const data = await this.userService.findOne(user?.id);
+
+    return {
+      success: true,
+      data: data,
     };
   }
 }

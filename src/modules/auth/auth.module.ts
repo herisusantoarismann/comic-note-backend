@@ -5,6 +5,7 @@ import { APP_PIPE } from '@nestjs/core';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma.service';
 import { MailService } from '../mail/mail.service';
+import { UserService } from '../user/user.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MailService } from '../mail/mail.service';
       useClass: ValidationPipe,
     },
     MailService,
+    UserService,
   ],
 })
 export class AuthModule {}
