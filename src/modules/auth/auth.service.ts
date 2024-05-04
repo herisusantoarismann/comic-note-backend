@@ -12,6 +12,7 @@ import { IUser } from '../user/interfaces/user.interface';
 import { MailService } from '../mail/mail.service';
 import { generateRandomNumbers } from 'src/common/helpers/generateRandomNumbers';
 import { add } from 'date-fns';
+import { IProfilePic } from '../user/interfaces/profile-pic.interfaces';
 
 @Injectable()
 export class AuthService {
@@ -73,6 +74,7 @@ export class AuthService {
     id: number;
     name: string;
     email: string;
+    profilePic: IProfilePic;
     access_token: string;
     refresh_token: string;
   }> {
@@ -86,6 +88,7 @@ export class AuthService {
       id: user?.id,
       name: user?.name,
       email: user?.email,
+      profilePic: user?.profilePic,
       access_token: accessToken,
       refresh_token: refreshToken,
     };
