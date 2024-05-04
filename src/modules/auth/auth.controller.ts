@@ -12,7 +12,6 @@ import { AuthService } from './auth.service';
 import { RegisterUser } from './dto/register-user.dto';
 import { LoginUser } from './dto/login-user.dto';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiOperation,
   ApiResponse,
@@ -49,6 +48,7 @@ export class AuthController {
       },
     },
   })
+  @HttpCode(201)
   @ApiResponse({
     status: 400,
     schema: {
@@ -63,7 +63,6 @@ export class AuthController {
       },
     },
   })
-  @HttpCode(201)
   async register(@Body() createUser: RegisterUser) {
     const { name, email, password } = createUser;
     const user = await this.authService.register(name, email, password);
@@ -75,6 +74,7 @@ export class AuthController {
 
   @ApiOperation({ summary: 'Login user' })
   @Post('login')
+  @HttpCode(200)
   @ApiResponse({
     status: 200,
     schema: {
@@ -132,6 +132,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Verify User by email' })
+  @HttpCode(200)
   @ApiResponse({
     status: 200,
     schema: {
@@ -173,6 +174,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: 'Verify token' })
+  @HttpCode(200)
   @ApiResponse({
     status: 200,
     schema: {
@@ -204,6 +206,7 @@ export class AuthController {
   }
 
   @ApiOperation({ summary: "Change user's password" })
+  @HttpCode(200)
   @ApiResponse({
     status: 200,
     schema: {
@@ -239,6 +242,7 @@ export class AuthController {
   @ApiBearerAuth('Token')
   @UseGuards(AuthGuard)
   @ApiOperation({ summary: 'Get user details' })
+  @HttpCode(200)
   @ApiResponse({
     status: 200,
     schema: {

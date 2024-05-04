@@ -102,8 +102,6 @@ export class AuthService {
   }
 
   comparePassword(enteredPassword: string, hash: string): Promise<boolean> {
-    console.log(enteredPassword);
-    console.log(hash);
     return bcrypt.compare(enteredPassword, hash);
   }
 
